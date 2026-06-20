@@ -72,6 +72,7 @@
         <button onclick="load()">查詢</button>
         <button class="ghost" onclick="clearF()">清除</button>
         <button class="ghost" onclick="exportCSV()">匯出 CSV</button>
+        <button class="ghost" onclick="seedUsers()">初始化員工 001-100</button>
       </div>
     </div>
 
@@ -179,6 +180,13 @@
     if(pts.length)map.fitBounds(pts,{padding:[40,40],maxZoom:16});
   }
 
+  function seedUsers(){
+    if(!confirm('建立員工帳號 001~100（預設密碼 1234）？\n已存在、已改過密碼的員工不會被覆蓋。')) return;
+    fetch(API_BASE+'/api/admin/seed?key='+encodeURIComponent(KEY),{method:'POST'})
+      .then(function(r){return r.json();})
+      .then(function(d){ alert(d.ok?(d.message+'\n目前員工數：'+d.total):('失敗：'+(d.error||''))); })
+      .catch(function(){alert('連線失敗');});
+  }
   function exportCSV(){
     var head=['時間','員工','類別','緯度','經度','誤差m'];
     var lines=[head.join(',')];

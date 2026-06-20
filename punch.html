@@ -12,11 +12,15 @@
   .top{background:var(--navy);color:#fff;padding:16px 18px;position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:10px}
   .top .lg{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-weight:900}
   .top b{font-size:17px;font-weight:800}
-  .top a{margin-left:auto;color:#bcd0e2;font-size:13px;font-weight:700}
+  .top .r{margin-left:auto;display:flex;gap:12px;align-items:center}
+  .top .r a,.top .r span{color:#bcd0e2;font-size:13px;font-weight:700;cursor:pointer}
   .box{max-width:520px;margin:0 auto;padding:16px}
   .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
-  .who label{font-size:13px;font-weight:700;color:var(--muted);display:block;margin-bottom:6px}
-  .who select{width:100%;padding:12px;border:1px solid var(--line);border-radius:9px;font-size:16px;font-family:inherit;background:#fff}
+  label{font-size:13px;font-weight:700;color:var(--muted);display:block;margin-bottom:6px}
+  input{width:100%;padding:13px;border:1px solid var(--line);border-radius:9px;font-size:16px;font-family:inherit;margin-bottom:12px}
+  .pbtn{width:100%;padding:14px;border:0;border-radius:10px;background:var(--navy);color:#fff;font-weight:800;font-size:16px;cursor:pointer;font-family:inherit}
+  .err{color:var(--bad);font-size:13.5px;min-height:18px;margin-bottom:6px}
+
   .status{text-align:center;padding:6px 0 2px}
   .ring{width:118px;height:118px;border-radius:50%;margin:6px auto 12px;display:grid;place-items:center;border:7px solid var(--line);transition:.3s}
   .ring.ok{border-color:var(--ok)} .ring.bad{border-color:var(--bad)} .ring.wait{border-color:var(--warn)}
@@ -30,97 +34,145 @@
   .btns button{padding:18px 0;border:0;border-radius:12px;font-size:18px;font-weight:800;color:#fff;font-family:inherit;cursor:pointer}
   .bin{background:var(--ok)} .bout{background:var(--navy)}
   .btns button:disabled{opacity:.45}
+  .me{text-align:center;font-size:15px;font-weight:800;color:var(--navy);margin-bottom:2px}
   h4{font-size:14px;font-weight:800;color:var(--navy);margin-bottom:10px}
   .rec{padding:11px 0;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
-  .rec:last-child{border-bottom:0}
-  .rec .t{font-weight:800;width:50px}.rec .ty{font-weight:700}
+  .rec:last-child{border-bottom:0}.rec .t{font-weight:800;width:50px}.rec .ty{font-weight:700}
   .rec .ty.in{color:var(--ok)} .rec .ty.out{color:var(--navy2)}
   .rec a{margin-left:auto;font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:16px;border:1px solid var(--line);color:var(--navy2);background:#f6f9fb}
   .empty{color:var(--muted);font-size:13.5px;text-align:center;padding:8px}
   .note{background:#fff7ef;border:1px solid #f3d8bd;color:#8a5a2b;font-size:12.5px;border-radius:10px;padding:11px 13px;margin-bottom:14px}
-  .warn{background:#fdecea;border:1px solid #f3c2bb;color:#a23a2c;font-size:12.5px;border-radius:10px;padding:11px 13px;margin-bottom:14px;display:none}
   .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(80px);background:var(--navy);color:#fff;padding:13px 22px;border-radius:30px;font-weight:700;font-size:15px;opacity:0;transition:.3s;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.3)}
   .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+  .hide{display:none}
 </style>
 </head>
 <body>
-  <div class="top"><span class="lg">廣</span><b>GPS 定位打卡</b><a href="index.html">回首頁</a></div>
+  <div class="top"><span class="lg">廣</span><b>GPS 定位打卡</b>
+    <div class="r" id="topR" style="display:none"><span onclick="changePw()">改密碼</span><span onclick="logout()">登出</span></div>
+  </div>
+
   <div class="box">
-    <div class="warn" id="cfgWarn">⚠ 後端尚未設定：請先完成 Cloudflare 部署，並把 Worker 網址填進本檔最上面的 API_BASE。</div>
-    <div class="note">打卡會把「人員 + 時間 + GPS 位置」寫進公司雲端資料庫，公司後台即可看到。可隨時打卡，不限地點。</div>
-
-    <div class="card who"><label>打卡人員</label>
-      <select id="emp"><option>林志成</option><option>陳建宏</option><option>王大維</option><option>張惠玲</option></select>
-    </div>
-
-    <div class="card">
-      <div class="status">
-        <div class="ring wait" id="ring"><b id="ringTxt">定位中…</b></div>
-        <div class="loc" id="locTxt">正在取得您的位置…</div>
-        <div class="acc" id="accTxt"></div>
-        <a class="maplink" id="mapLink" style="display:none" target="_blank">📍 在地圖查看目前位置</a>
-        <span class="relocate" onclick="locate()">↻ 重新定位</span>
-      </div>
-      <div class="btns">
-        <button class="bin" id="btnIn" onclick="punch('in')" disabled>上班打卡</button>
-        <button class="bout" id="btnOut" onclick="punch('out')" disabled>下班打卡</button>
+    <!-- 登入 -->
+    <div id="loginView">
+      <div class="note">請用你的員工編號登入。預設密碼 <b>1234</b>，登入後可自行修改。</div>
+      <div class="card">
+        <label>員工編號（001～100）</label>
+        <input id="inNo" inputmode="numeric" placeholder="例如 007">
+        <label>密碼</label>
+        <input id="inPw" type="password" placeholder="預設 1234" onkeydown="if(event.key==='Enter')login()">
+        <div class="err" id="loginErr"></div>
+        <button class="pbtn" onclick="login()">登入</button>
       </div>
     </div>
 
-    <div class="card"><h4>📋 本次打卡</h4><div id="recs"><div class="empty">尚未打卡</div></div></div>
+    <!-- 打卡 -->
+    <div id="punchView" class="hide">
+      <div class="card">
+        <div class="me" id="meTxt"></div>
+        <div class="status">
+          <div class="ring wait" id="ring"><b id="ringTxt">定位中…</b></div>
+          <div class="loc" id="locTxt">正在取得您的位置…</div>
+          <div class="acc" id="accTxt"></div>
+          <a class="maplink" id="mapLink" style="display:none" target="_blank">📍 在地圖查看目前位置</a>
+          <span class="relocate" onclick="locate()">↻ 重新定位</span>
+        </div>
+        <div class="btns">
+          <button class="bin" id="btnIn" onclick="punch('in')" disabled>上班打卡</button>
+          <button class="bout" id="btnOut" onclick="punch('out')" disabled>下班打卡</button>
+        </div>
+      </div>
+      <div class="card"><h4>📋 本次打卡</h4><div id="recs"><div class="empty">尚未打卡</div></div></div>
+    </div>
   </div>
   <div class="toast" id="toast"></div>
 
 <script>
-  /* ★★★ 部署 Worker 後，把你的 Worker 網址貼到這裡（結尾不要加斜線）★★★ */
   var API_BASE = "https://guangxiu-punch.coating-wu.workers.dev";
-
+  var ME=null; // {empno,name,token}
   var cur=null, session=[];
+
+  function $(id){return document.getElementById(id);}
   function mapUrl(la,ln){return "https://www.google.com/maps?q="+la+","+ln;}
-  function setBtns(on){document.getElementById('btnIn').disabled=!on;document.getElementById('btnOut').disabled=!on;}
+  function setBtns(on){$('btnIn').disabled=!on;$('btnOut').disabled=!on;}
 
-  if(API_BASE.indexOf('REPLACE_ME')>=0){document.getElementById('cfgWarn').style.display='block';}
+  // ---- 登入 ----
+  function login(){
+    var no=$('inNo').value.trim(), pw=$('inPw').value;
+    if(!no||!pw){$('loginErr').textContent='請輸入編號與密碼';return;}
+    $('loginErr').textContent='登入中…';
+    fetch(API_BASE+'/api/login',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({empno:no,password:pw})})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d.ok){ ME={empno:d.empno,name:d.name,token:d.token};
+        localStorage.setItem('gx_me',JSON.stringify(ME)); enterApp(); }
+      else $('loginErr').textContent=d.error||'登入失敗';
+    }).catch(function(){$('loginErr').textContent='連線失敗，請檢查網路';});
+  }
+  function logout(){localStorage.removeItem('gx_me');location.reload();}
 
+  function enterApp(){
+    $('loginView').classList.add('hide');
+    $('punchView').classList.remove('hide');
+    $('topR').style.display='flex';
+    $('meTxt').textContent='編號 '+ME.empno+'　'+(ME.name||'');
+    locate();
+  }
+
+  function changePw(){
+    var np=prompt('輸入新密碼（至少 4 碼）');
+    if(np===null) return;
+    if(np.length<4){toast('密碼至少 4 碼');return;}
+    var np2=prompt('再輸入一次新密碼');
+    if(np2!==np){toast('兩次密碼不一致');return;}
+    fetch(API_BASE+'/api/change-password',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({empno:ME.empno,token:ME.token,newPassword:np})})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d.ok){ ME.token=d.token; localStorage.setItem('gx_me',JSON.stringify(ME)); toast('密碼已更新'); }
+      else toast(d.error||'更新失敗');
+    }).catch(function(){toast('連線失敗');});
+  }
+
+  // ---- 定位 ----
   function locate(){
-    var ring=document.getElementById('ring'),rt=document.getElementById('ringTxt');
+    var ring=$('ring'),rt=$('ringTxt');
     ring.className='ring wait';rt.textContent='定位中…';
-    document.getElementById('locTxt').textContent='正在取得您的位置…';
-    document.getElementById('accTxt').textContent='';document.getElementById('mapLink').style.display='none';
+    $('locTxt').textContent='正在取得您的位置…';$('accTxt').textContent='';$('mapLink').style.display='none';
     setBtns(false);
     if(!navigator.geolocation){fail('此裝置不支援定位');return;}
     navigator.geolocation.getCurrentPosition(function(p){
       cur={lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy};
       ring.className='ring ok';rt.textContent='定位成功';
-      document.getElementById('locTxt').innerHTML='座標 <b>'+cur.lat.toFixed(5)+', '+cur.lng.toFixed(5)+'</b>';
-      document.getElementById('accTxt').textContent='定位誤差約 ±'+Math.round(cur.acc)+' m';
-      var ml=document.getElementById('mapLink');ml.href=mapUrl(cur.lat,cur.lng);ml.style.display='inline-block';
+      $('locTxt').innerHTML='座標 <b>'+cur.lat.toFixed(5)+', '+cur.lng.toFixed(5)+'</b>';
+      $('accTxt').textContent='定位誤差約 ±'+Math.round(cur.acc)+' m';
+      var ml=$('mapLink');ml.href=mapUrl(cur.lat,cur.lng);ml.style.display='inline-block';
       setBtns(true);
     },function(e){fail(e.code===1?'您拒絕了定位權限，請到瀏覽器設定開啟':'定位失敗，請到空曠處再試');},
     {enableHighAccuracy:true,timeout:12000,maximumAge:0});
   }
-  function fail(m){document.getElementById('ring').className='ring bad';document.getElementById('ringTxt').textContent='定位失敗';document.getElementById('locTxt').textContent=m;setBtns(false);}
+  function fail(m){$('ring').className='ring bad';$('ringTxt').textContent='定位失敗';$('locTxt').textContent=m;setBtns(false);}
 
+  // ---- 打卡 ----
   function punch(type){
     if(!cur){toast('尚未取得定位，請按重新定位');return;}
-    if(API_BASE.indexOf('REPLACE_ME')>=0){toast('後端尚未設定，無法打卡');return;}
     setBtns(false);
     fetch(API_BASE+'/api/punch',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({emp:document.getElementById('emp').value,type:type,lat:cur.lat,lng:cur.lng,acc:Math.round(cur.acc)})})
+      body:JSON.stringify({empno:ME.empno,token:ME.token,type:type,lat:cur.lat,lng:cur.lng,acc:Math.round(cur.acc)})})
     .then(function(r){return r.json();})
     .then(function(d){
       setBtns(true);
       if(d.ok){
         var now=new Date();
         session.unshift({type:type,time:now.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',hour12:false}),lat:cur.lat,lng:cur.lng});
-        renderRecs();
-        toast((type==='in'?'上班':'下班')+'打卡成功');
-      } else { toast('打卡失敗：'+(d.error||'')); }
-    })
-    .catch(function(){setBtns(true);toast('連線失敗，請檢查網路');});
+        renderRecs(); toast((type==='in'?'上班':'下班')+'打卡成功');
+      } else if(d.error&&d.error.indexOf('登入')>=0){ toast('登入失效，請重新登入'); setTimeout(logout,1200); }
+      else toast('打卡失敗：'+(d.error||''));
+    }).catch(function(){setBtns(true);toast('連線失敗，請檢查網路');});
   }
-
   function renderRecs(){
-    var el=document.getElementById('recs');
+    var el=$('recs');
     if(!session.length){el.innerHTML='<div class="empty">尚未打卡</div>';return;}
     el.innerHTML=session.map(function(r){
       return '<div class="rec"><span class="t">'+r.time+'</span><span class="ty '+r.type+'">'+(r.type==='in'?'上班':'下班')+'</span>'+
@@ -128,8 +180,10 @@
     }).join('');
   }
 
-  var tT;function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tT);tT=setTimeout(function(){t.classList.remove('show');},2400);}
-  locate();
+  var tT;function toast(m){var t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(tT);tT=setTimeout(function(){t.classList.remove('show');},2400);}
+
+  // 自動登入（這支手機記住）
+  (function(){var s=localStorage.getItem('gx_me');if(s){try{ME=JSON.parse(s);enterApp();}catch(e){}}})();
 </script>
 </body>
 </html>
