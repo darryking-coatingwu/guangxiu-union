@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>廣修企業 × 聯合營造｜專屬平台雛形</title>
+<style>
+  :root{
+    --navy:#13314f; --navy2:#1d4870; --steel:#5b7794; --line:#e2e8ee;
+    --bg:#f4f6f9; --ink:#1a2733; --muted:#6b7a89; --accent:#e8772e; --accent2:#f0913f;
+    --ok:#2f9e6f; --warn:#d4892a; --card:#ffffff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Noto Sans TC","Segoe UI",system-ui,sans-serif;color:var(--ink);background:var(--bg);line-height:1.6}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+  a{color:inherit;text-decoration:none}
+
+  /* top bar */
+  .topbar{background:var(--navy);color:#fff;position:sticky;top:0;z-index:50;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+  .topbar .wrap{display:flex;align-items:center;gap:20px;height:64px}
+  .brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:19px;letter-spacing:.5px}
+  .logo{width:34px;height:34px;border-radius:7px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-weight:900;color:#fff}
+  .switch{display:flex;background:rgba(255,255,255,.10);border-radius:9px;padding:4px;margin-left:6px}
+  .switch button{border:0;background:transparent;color:#cdd9e6;font-weight:700;font-size:13.5px;padding:7px 15px;border-radius:6px;cursor:pointer;font-family:inherit;transition:.15s}
+  .switch button.on{background:#fff;color:var(--navy)}
+  nav.main{margin-left:auto;display:flex;gap:6px;align-items:center}
+  nav.main a{color:#d6e0ea;font-weight:600;font-size:14.5px;padding:8px 13px;border-radius:6px;cursor:pointer}
+  nav.main a:hover{background:rgba(255,255,255,.08);color:#fff}
+  .btn-erp{background:var(--accent);color:#fff !important;font-weight:800;padding:9px 17px !important;border-radius:7px}
+  .btn-erp:hover{background:var(--accent2) !important}
+
+  /* hero */
+  .hero{position:relative;color:#fff;padding:78px 0 70px;
+    background:linear-gradient(115deg,#0f2840 0%,#1d4870 60%,#2c5d8c 100%);overflow:hidden}
+  .hero::after{content:"";position:absolute;inset:0;opacity:.10;
+    background-image:repeating-linear-gradient(45deg,#fff 0 2px,transparent 2px 26px)}
+  .hero .wrap{position:relative}
+  .tag{display:inline-block;background:rgba(232,119,46,.20);border:1px solid var(--accent);color:#ffd9bf;
+    font-weight:700;font-size:13px;padding:5px 13px;border-radius:30px;margin-bottom:18px}
+  .hero h1{font-size:42px;line-height:1.25;font-weight:900;letter-spacing:.5px;max-width:760px}
+  .hero p.lead{margin-top:16px;font-size:17.5px;color:#d4e2f0;max-width:640px}
+  .hero .cta{margin-top:30px;display:flex;gap:13px;flex-wrap:wrap}
+  .cta a{padding:13px 24px;border-radius:8px;font-weight:800;font-size:15px;cursor:pointer}
+  .cta .p{background:var(--accent);color:#fff}
+  .cta .s{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.35)}
+  .stats{display:flex;gap:42px;margin-top:46px;flex-wrap:wrap}
+  .stats div b{display:block;font-size:32px;font-weight:900;color:#fff}
+  .stats div span{font-size:13.5px;color:#bcd0e2}
+
+  /* sections */
+  section.blk{padding:62px 0}
+  .eyebrow{color:var(--accent);font-weight:800;font-size:13.5px;letter-spacing:2px;text-transform:uppercase}
+  h2.sec{font-size:28px;font-weight:900;margin:8px 0 8px}
+  .sub{color:var(--muted);font-size:15.5px;margin-bottom:34px;max-width:620px}
+  .grid{display:grid;gap:20px}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:860px){.g3,.g4{grid-template-columns:1fr 1fr}}
+  @media(max-width:560px){.g3,.g4{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:24px;transition:.18s}
+  .card:hover{box-shadow:0 10px 26px rgba(19,49,79,.10);transform:translateY(-3px)}
+  .card .ic{width:46px;height:46px;border-radius:10px;background:#eef3f8;display:grid;place-items:center;font-size:23px;margin-bottom:14px}
+  .card h3{font-size:17.5px;font-weight:800;margin-bottom:7px}
+  .card p{color:var(--muted);font-size:14px}
+
+  /* projects */
+  .projects{background:#0f2840;color:#fff}
+  .projects .sub{color:#9fb6cc}
+  .proj{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  @media(max-width:860px){.proj{grid-template-columns:1fr 1fr}}
+  @media(max-width:560px){.proj{grid-template-columns:1fr}}
+  .pcard{background:#16365455;border:1px solid #2b5275;border-radius:12px;overflow:hidden}
+  .pcard .ph{height:120px;background:linear-gradient(135deg,#22577f,#13314f);display:grid;place-items:center;color:#5e86aa;font-size:40px}
+  .pcard .pb{padding:16px 18px}
+  .pcard .pb b{font-size:16px}
+  .pcard .pb span{display:block;color:#9fb6cc;font-size:13px;margin-top:4px}
+  .pcard .pb .tg{display:inline-block;margin-top:10px;font-size:11.5px;color:#ffd9bf;border:1px solid var(--accent);padding:2px 9px;border-radius:20px}
+
+  /* contact */
+  .contact{background:#fff}
+  .cbox{display:grid;grid-template-columns:1.1fr 1fr;gap:30px;background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:34px}
+  @media(max-width:760px){.cbox{grid-template-columns:1fr}}
+  .field{margin-bottom:13px}
+  .field label{display:block;font-size:13px;font-weight:700;color:var(--steel);margin-bottom:5px}
+  .field input,.field textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:14px}
+  .send{background:var(--navy);color:#fff;border:0;padding:13px 22px;border-radius:8px;font-weight:800;cursor:pointer;font-family:inherit}
+
+  footer{background:var(--navy);color:#aebfce;padding:30px 0;font-size:13.5px}
+  footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+
+  /* ===== ERP ===== */
+  .erp{display:none;min-height:100vh;background:var(--bg)}
+  .erp.show{display:block}
+  .site.hide{display:none}
+  .erp-top{background:#fff;border-bottom:1px solid var(--line);height:60px;display:flex;align-items:center;gap:16px;padding:0 22px;position:sticky;top:0;z-index:20}
+  .erp-top .b{font-weight:900;color:var(--navy);font-size:16px}
+  .pill{background:#eef3f8;color:var(--navy2);font-weight:700;font-size:12.5px;padding:5px 12px;border-radius:20px}
+  .erp-top .right{margin-left:auto;display:flex;align-items:center;gap:14px}
+  .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px}
+  .back{cursor:pointer;color:var(--steel);font-weight:700;font-size:13.5px}
+  .erp-body{display:flex;min-height:calc(100vh - 60px)}
+  .side{width:215px;background:#13314f;color:#cdd9e6;padding:16px 12px;flex-shrink:0}
+  .side .grp{font-size:11px;letter-spacing:1.5px;color:#6b8bab;margin:16px 10px 6px;text-transform:uppercase}
+  .side a{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;color:#cdd9e6}
+  .side a:hover{background:#1d4870;color:#fff}
+  .side a.on{background:var(--accent);color:#fff}
+  .side a .e{width:18px;text-align:center}
+  .main{flex:1;padding:26px 30px;overflow:auto}
+  .crumb{color:var(--muted);font-size:13px;margin-bottom:4px}
+  .ptitle{font-size:23px;font-weight:900;margin-bottom:22px}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:26px}
+  @media(max-width:900px){.kpis{grid-template-columns:1fr 1fr}}
+  .kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px}
+  .kpi span{color:var(--muted);font-size:13px;font-weight:600}
+  .kpi b{display:block;font-size:26px;font-weight:900;margin-top:6px;color:var(--navy)}
+  .kpi i{font-style:normal;font-size:12.5px;font-weight:700}
+  .up{color:var(--ok)} .dn{color:#c0492b}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:20px}
+  .panel h4{font-size:16px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{text-align:left;padding:11px 10px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:700;font-size:12px;letter-spacing:.5px;background:#f8fafc}
+  td b{font-weight:700}
+  .badge{font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:20px}
+  .b-ok{background:#e4f5ec;color:var(--ok)} .b-wait{background:#fdf1e0;color:var(--warn)} .b-low{background:#fce8e6;color:#c0492b}
+  .bar{height:7px;background:#eef3f8;border-radius:5px;overflow:hidden;width:110px}
+  .bar i{display:block;height:100%;background:var(--accent);border-radius:5px}
+  .two{display:grid;grid-template-columns:1.4fr 1fr;gap:20px}
+  @media(max-width:900px){.two{grid-template-columns:1fr}}
+  .erp-view{display:none}.erp-view.on{display:block}
+  .note{font-size:12.5px;color:var(--muted);margin-top:10px}
+  .demoflag{position:fixed;bottom:14px;right:14px;background:#13314f;color:#ffd9bf;font-size:12px;font-weight:700;padding:7px 14px;border-radius:30px;z-index:99;border:1px solid var(--accent)}
+</style>
+</head>
+<body>
+
+<!-- ============ PUBLIC SITE ============ -->
+<div class="site" id="site">
+  <div class="topbar">
+    <div class="wrap">
+      <div class="brand"><div class="logo" id="logoTxt">廣</div><span id="brandName">廣修企業</span></div>
+      <div class="switch">
+        <button id="sw-k" class="on" onclick="setCo('k')">廣修企業</button>
+        <button id="sw-u" onclick="setCo('u')">聯合營造</button>
+      </div>
+      <nav class="main">
+        <a onclick="scrollTo(0,0)">首頁</a>
+        <a>服務項目</a>
+        <a>工程實績</a>
+        <a>關於我們</a>
+        <a class="btn-erp" onclick="openErp()">登入企業系統</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="wrap">
+      <span class="tag" id="heroTag">結構補強 · 耐震補強 · 切割取樣</span>
+      <h1 id="heroH1">把結構安全，做到讓人放心。</h1>
+      <p class="lead" id="heroLead">專業結構補強、耐震評估與混凝土切割取樣工程，從檢測、設計到施工一手掌握，為每一棟建築延長安全壽命。</p>
+      <div class="cta">
+        <a class="p" onclick="document.querySelector('#svc').scrollIntoView({behavior:'smooth'})">了解服務</a>
+        <a class="s" onclick="document.querySelector('#ct').scrollIntoView({behavior:'smooth'})">免費諮詢評估</a>
+      </div>
+      <div class="stats" id="stats"></div>
+    </div>
+  </div>
+
+  <section class="blk" id="svc">
+    <div class="wrap">
+      <div class="eyebrow">SERVICES</div>
+      <h2 class="sec" id="svcTitle">專業服務項目</h2>
+      <p class="sub" id="svcSub">涵蓋從檢測評估到施工完成的完整工程服務。</p>
+      <div class="grid g3" id="svcGrid"></div>
+    </div>
+  </section>
+
+  <section class="blk projects">
+    <div class="wrap">
+      <div class="eyebrow">PROJECTS</div>
+      <h2 class="sec">工程實績</h2>
+      <p class="sub">精選近期完成之代表性工程案例。</p>
+      <div class="proj" id="projGrid"></div>
+    </div>
+  </section>
+
+  <section class="blk contact" id="ct">
+    <div class="wrap">
+      <div class="eyebrow">CONTACT</div>
+      <h2 class="sec">聯絡與諮詢</h2>
+      <p class="sub">留下需求，我們的工程團隊將盡快與您聯繫評估。</p>
+      <div class="cbox">
+        <div>
+          <div class="field"><label>公司 / 姓名</label><input placeholder="請輸入"></div>
+          <div class="field"><label>聯絡電話</label><input placeholder="請輸入"></div>
+          <div class="field"><label>工程需求說明</label><textarea rows="3" placeholder="例如：屋齡 30 年大樓耐震評估與補強"></textarea></div>
+          <button class="send" onclick="alert('（雛形示意）已收到您的諮詢，我們會盡快聯繫！')">送出諮詢</button>
+        </div>
+        <div style="font-size:14.5px;color:var(--ink)">
+          <p style="font-weight:800;font-size:16px;margin-bottom:10px" id="ctName">廣修企業有限公司</p>
+          <p style="color:var(--muted);margin-bottom:6px">📍 台中市（示意地址）</p>
+          <p style="color:var(--muted);margin-bottom:6px">📞 04-0000-0000</p>
+          <p style="color:var(--muted);margin-bottom:6px">✉ service@example.com.tw</p>
+          <p style="color:var(--muted);margin-top:14px;font-size:13px">營業時間：週一至週五 08:30–17:30</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <div>© 2026 <span id="footName">廣修企業</span>．本頁為網站雛形示意</div>
+      <div>廣修企業 × 聯合營造　共用平台 · 分公司切換</div>
+    </div>
+  </footer>
+</div>
+
+<!-- ============ ERP ============ -->
+<div class="erp" id="erp">
+  <div class="erp-top">
+    <span class="b">營運管理系統 ERP</span>
+    <span class="pill" id="erpCo">廣修企業</span>
+    <div class="right">
+      <span class="back" onclick="closeErp()">← 回到官網</span>
+      <div class="avatar">吳</div>
+    </div>
+  </div>
+  <div class="erp-body">
+    <div class="side">
+      <div class="grp">總覽</div>
+      <a class="on" data-v="dash" onclick="erpNav('dash')"><span class="e">▦</span>儀表板</a>
+      <div class="grp">營運</div>
+      <a data-v="inv" onclick="erpNav('inv')"><span class="e">📦</span>進銷存管理</a>
+      <a data-v="proj" onclick="erpNav('proj')"><span class="e">🏗</span>工程專案</a>
+      <a data-v="po" onclick="erpNav('po')"><span class="e">🧾</span>採購請購</a>
+      <a data-v="con" onclick="erpNav('con')"><span class="e">📑</span>合約請款</a>
+      <div class="grp">人事（自建 HR）</div>
+      <a data-v="hr" onclick="erpNav('hr')"><span class="e">👷</span>出勤 · 簽核 · 薪資</a>
+      <div class="grp">分析</div>
+      <a data-v="rep" onclick="erpNav('rep')"><span class="e">📊</span>報表中心</a>
+    </div>
+    <div class="main">
+
+      <!-- dashboard -->
+      <div class="erp-view on" id="v-dash">
+        <div class="crumb">總覽 / 儀表板</div>
+        <div class="ptitle" id="dashTitle">廣修企業　營運儀表板</div>
+        <div class="kpis">
+          <div class="kpi"><span>本月營收</span><b>$ 1,860萬</b><i class="up">▲ 12.4%</i></div>
+          <div class="kpi"><span>進行中工程</span><b>7 案</b><i class="up">▲ 2</i></div>
+          <div class="kpi"><span>待估驗請款</span><b>$ 540萬</b><i class="dn">3 筆逾期</i></div>
+          <div class="kpi"><span>低庫存品項</span><b>5 項</b><i class="dn">需補料</i></div>
+        </div>
+        <div class="two">
+          <div class="panel">
+            <h4>🏗 工程專案進度</h4>
+            <table>
+              <tr><th>專案</th><th>業主</th><th>進度</th><th>狀態</th></tr>
+              <tr><td><b>南區大樓耐震補強</b></td><td>市府都發</td><td><div class="bar"><i style="width:78%"></i></div></td><td><span class="badge b-ok">施工中</span></td></tr>
+              <tr><td><b>廠房結構補強</b></td><td>聯華食品</td><td><div class="bar"><i style="width:45%"></i></div></td><td><span class="badge b-ok">施工中</span></td></tr>
+              <tr><td><b>橋樑切割取樣</b></td><td>公路局</td><td><div class="bar"><i style="width:92%"></i></div></td><td><span class="badge b-wait">估驗中</span></td></tr>
+              <tr><td><b>校舍耐震評估</b></td><td>教育局</td><td><div class="bar"><i style="width:20%"></i></div></td><td><span class="badge b-wait">設計</span></td></tr>
+            </table>
+          </div>
+          <div class="panel">
+            <h4>🔔 待辦簽核</h4>
+            <table>
+              <tr><td>請購單 #PR-2261</td><td><span class="badge b-wait">待簽</span></td></tr>
+              <tr><td>請假單 王技師</td><td><span class="badge b-wait">待簽</span></td></tr>
+              <tr><td>採購單 #PO-1180</td><td><span class="badge b-ok">已核</span></td></tr>
+              <tr><td>估驗計價 #V-077</td><td><span class="badge b-wait">待簽</span></td></tr>
+            </table>
+            <p class="note">手機可即時簽核，逾時自動提醒。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- inventory -->
+      <div class="erp-view" id="v-inv">
+        <div class="crumb">營運 / 進銷存管理</div>
+        <div class="ptitle">進銷存 · 工料與設備機具</div>
+        <div class="kpis">
+          <div class="kpi"><span>庫存品項</span><b>328</b></div>
+          <div class="kpi"><span>本月進貨</span><b>$ 412萬</b></div>
+          <div class="kpi"><span>工地領用</span><b>$ 286萬</b></div>
+          <div class="kpi"><span>低庫存警示</span><b style="color:#c0492b">5</b></div>
+        </div>
+        <div class="panel">
+          <h4>📦 庫存明細</h4>
+          <table>
+            <tr><th>品項</th><th>分類</th><th>庫存</th><th>安全量</th><th>單價</th><th>狀態</th></tr>
+            <tr><td><b>環氧樹脂植筋膠</b></td><td>補強材料</td><td>18 支</td><td>30</td><td>$ 850</td><td><span class="badge b-low">低於安全量</span></td></tr>
+            <tr><td><b>碳纖維布 CFRP</b></td><td>補強材料</td><td>240 m</td><td>120</td><td>$ 1,200</td><td><span class="badge b-ok">充足</span></td></tr>
+            <tr><td><b>鋼板補強片</b></td><td>鋼構</td><td>62 片</td><td>40</td><td>$ 2,400</td><td><span class="badge b-ok">充足</span></td></tr>
+            <tr><td><b>鑽石鋸片 14"</b></td><td>切割機具</td><td>4 片</td><td>8</td><td>$ 3,600</td><td><span class="badge b-low">低於安全量</span></td></tr>
+            <tr><td><b>無收縮水泥砂漿</b></td><td>填補材料</td><td>95 包</td><td>50</td><td>$ 320</td><td><span class="badge b-ok">充足</span></td></tr>
+          </table>
+          <p class="note">進貨、領用、調撥皆連動庫存；領用可掛到對應工程專案，計入工料成本。</p>
+        </div>
+      </div>
+
+      <!-- project -->
+      <div class="erp-view" id="v-proj">
+        <div class="crumb">營運 / 工程專案</div>
+        <div class="ptitle">工程專案管理</div>
+        <div class="panel">
+          <h4>🏗 專案清單</h4>
+          <table>
+            <tr><th>專案編號</th><th>名稱</th><th>業主</th><th>合約額</th><th>已估驗</th><th>工料成本</th><th>進度</th></tr>
+            <tr><td>PJ-031</td><td><b>南區大樓耐震補強</b></td><td>市府都發</td><td>$ 2,800萬</td><td>$ 2,180萬</td><td>$ 1,240萬</td><td><div class="bar"><i style="width:78%"></i></div></td></tr>
+            <tr><td>PJ-029</td><td><b>聯華廠房結構補強</b></td><td>聯華食品</td><td>$ 1,450萬</td><td>$ 650萬</td><td>$ 410萬</td><td><div class="bar"><i style="width:45%"></i></div></td></tr>
+            <tr><td>PJ-027</td><td><b>橋樑切割取樣</b></td><td>公路局</td><td>$ 320萬</td><td>$ 295萬</td><td>$ 158萬</td><td><div class="bar"><i style="width:92%"></i></div></td></tr>
+          </table>
+          <p class="note">每個專案串接：合約 → 估驗計價 → 工料領用 → 請款，成本與毛利即時可見。</p>
+        </div>
+      </div>
+
+      <!-- po -->
+      <div class="erp-view" id="v-po">
+        <div class="crumb">營運 / 採購請購</div>
+        <div class="ptitle">採購與請購</div>
+        <div class="panel">
+          <h4>🧾 請購 / 採購單</h4>
+          <table>
+            <tr><th>單號</th><th>品項</th><th>請購人</th><th>金額</th><th>對應專案</th><th>狀態</th></tr>
+            <tr><td>PR-2261</td><td>植筋膠 ×40</td><td>王技師</td><td>$ 34,000</td><td>PJ-031</td><td><span class="badge b-wait">待簽核</span></td></tr>
+            <tr><td>PO-1180</td><td>碳纖維布 ×200m</td><td>採購部</td><td>$ 240,000</td><td>PJ-029</td><td><span class="badge b-ok">已下單</span></td></tr>
+            <tr><td>PO-1176</td><td>鑽石鋸片 ×10</td><td>採購部</td><td>$ 36,000</td><td>PJ-027</td><td><span class="badge b-ok">已到貨</span></td></tr>
+          </table>
+          <p class="note">請購 → 簽核 → 轉採購 → 到貨入庫，全程一條龍，並回扣工程成本。</p>
+        </div>
+      </div>
+
+      <!-- contract -->
+      <div class="erp-view" id="v-con">
+        <div class="crumb">營運 / 合約請款</div>
+        <div class="ptitle">合約與估驗請款</div>
+        <div class="panel">
+          <h4>📑 合約 / 請款</h4>
+          <table>
+            <tr><th>合約</th><th>業主</th><th>合約額</th><th>本期估驗</th><th>請款狀態</th></tr>
+            <tr><td><b>南區耐震補強</b></td><td>市府都發</td><td>$ 2,800萬</td><td>$ 320萬</td><td><span class="badge b-wait">請款中</span></td></tr>
+            <tr><td><b>橋樑切割取樣</b></td><td>公路局</td><td>$ 320萬</td><td>$ 95萬</td><td><span class="badge b-low">逾期未收</span></td></tr>
+            <tr><td><b>校舍耐震評估</b></td><td>教育局</td><td>$ 180萬</td><td>—</td><td><span class="badge b-ok">已簽約</span></td></tr>
+          </table>
+          <p class="note">線上電子簽署、合約到期 / 請款節點自動提醒、與工程估驗連動。</p>
+        </div>
+      </div>
+
+      <!-- hr -->
+      <div class="erp-view" id="v-hr">
+        <div class="crumb">人事 / 自建 HR</div>
+        <div class="ptitle">出勤 · 簽核 · 薪資（自建，對標 104 企業大師）</div>
+        <div class="kpis">
+          <div class="kpi"><span>今日出勤</span><b>42 / 46</b></div>
+          <div class="kpi"><span>工地 GPS 打卡</span><b>31</b></div>
+          <div class="kpi"><span>待簽表單</span><b>6</b></div>
+          <div class="kpi"><span>本月加班時數</span><b>318 h</b></div>
+        </div>
+        <div class="two">
+          <div class="panel">
+            <h4>👷 今日出勤（工地 GPS 打卡）</h4>
+            <table>
+              <tr><th>姓名</th><th>據點 / 工地</th><th>上班</th><th>狀態</th></tr>
+              <tr><td>王志明</td><td>南區工地</td><td>07:52</td><td><span class="badge b-ok">正常</span></td></tr>
+              <tr><td>陳建宏</td><td>聯華廠房</td><td>08:14</td><td><span class="badge b-wait">遲到</span></td></tr>
+              <tr><td>林大維</td><td>橋樑工地</td><td>—</td><td><span class="badge b-low">未打卡</span></td></tr>
+              <tr><td>張惠玲</td><td>公司辦公室</td><td>08:28</td><td><span class="badge b-ok">正常</span></td></tr>
+            </table>
+          </div>
+          <div class="panel">
+            <h4>⚠ 自建 HR 須自行承擔</h4>
+            <p style="font-size:13.5px;color:var(--muted)">不接 104 企業大師，代表以下要自己維護更新：</p>
+            <table>
+              <tr><td>勞健保級距</td><td><span class="badge b-wait">需自維</span></td></tr>
+              <tr><td>所得稅 / 二代健保</td><td><span class="badge b-wait">需自維</span></td></tr>
+              <tr><td>變形工時排班規則</td><td><span class="badge b-wait">需自維</span></td></tr>
+              <tr><td>勞基法修法更新</td><td><span class="badge b-wait">需自維</span></td></tr>
+            </table>
+            <p class="note">這些 104 會幫你跟著法規更新；自建須在合約裡寫明由誰維護。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- report -->
+      <div class="erp-view" id="v-rep">
+        <div class="crumb">分析 / 報表中心</div>
+        <div class="ptitle">報表中心</div>
+        <div class="grid g3">
+          <div class="card"><div class="ic">📊</div><h3>工程毛利分析</h3><p>各專案合約額、成本、毛利率排行。</p></div>
+          <div class="card"><div class="ic">📦</div><h3>工料成本報表</h3><p>材料領用、庫存周轉與耗用趨勢。</p></div>
+          <div class="card"><div class="ic">💰</div><h3>應收 / 請款追蹤</h3><p>估驗請款、逾期帳款預警。</p></div>
+          <div class="card"><div class="ic">👷</div><h3>出勤 / 工時報表</h3><p>出勤、加班、工地人力統計。</p></div>
+          <div class="card"><div class="ic">🏢</div><h3>分公司比較</h3><p>廣修 vs 聯合營造 營運對比。</p></div>
+          <div class="card"><div class="ic">📈</div><h3>營收趨勢</h3><p>月 / 季營收與在建工程預估。</p></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="demoflag">網站雛形 Demo · 點上方切換公司 / 登入系統</div>
+
+<script>
+  const DATA = {
+    k:{
+      name:"廣修企業", full:"廣修企業有限公司", logo:"廣",
+      tag:"結構補強 · 耐震補強 · 切割取樣",
+      h1:"把結構安全，做到讓人放心。",
+      lead:"專業結構補強、耐震評估與混凝土切割取樣工程，從檢測、設計到施工一手掌握，為每一棟建築延長安全壽命。",
+      stats:[["18+","年專業工程經驗"],["350+","完成工程案件"],["100%","結構安全把關"]],
+      svcTitle:"專業服務項目",
+      svcSub:"涵蓋從結構檢測到補強施工的完整工程服務。",
+      svc:[
+        ["🏛","結構補強","碳纖維、鋼板、植筋等多種工法，恢復並提升建築承載力。"],
+        ["🌐","耐震補強","耐震詳評與補強設計施工，符合最新耐震規範。"],
+        ["🔩","切割取樣","混凝土鑽心取樣、結構切割，提供精準檢測數據。"],
+        ["🔍","結構檢測評估","非破壞檢測與安全評估，出具專業報告。"],
+        ["📐","補強設計","由技師團隊量身規劃補強工法與施工計畫。"],
+        ["🛠","施工監造","全程品管與安全控管，如期如質完工。"]
+      ],
+      proj:[
+        ["🏢","南區大樓耐震補強","市府都發局","耐震補強"],
+        ["🏭","聯華廠房結構補強","聯華食品","結構補強"],
+        ["🌉","橋樑切割取樣","公路局","切割取樣"]
+      ]
+    },
+    u:{
+      name:"聯合營造", full:"聯合營造股份有限公司", logo:"聯",
+      tag:"建築工程 · 統包營造 · 公共工程",
+      h1:"蓋得扎實，交得安心。",
+      lead:"提供建築新建、統包工程與公共工程營造服務，整合設計、施工與專案管理，把每一個工程準時、安全、如質交到業主手上。",
+      stats:[["25+","年營造實績"],["120+","承攬工程案"],["甲級","營造業登記"]],
+      svcTitle:"營造服務項目",
+      svcSub:"從建築新建到公共工程的全方位營造服務。",
+      svc:[
+        ["🏗","建築工程","住宅、商辦、廠房新建，結構到裝修一手包辦。"],
+        ["📦","統包工程","設計施工統包（Design-Build），單一窗口負責到底。"],
+        ["🛣","公共工程","道路、橋樑、公共設施等政府標案營造。"],
+        ["🏭","廠房工程","工業廠房規劃與營建，配合生產動線。"],
+        ["📋","專案管理","進度、成本、品質、安全四大控管。"],
+        ["🦺","公安衛生","落實工地安全衛生，零事故為目標。"]
+      ],
+      proj:[
+        ["🏢","市區商辦大樓新建","民間業主","建築工程"],
+        ["🛣","區域道路改善工程","地方政府","公共工程"],
+        ["🏭","電子廠房統包","科技業主","統包工程"]
+      ]
+    }
+  };
+
+  let CO = 'k';
+  function setCo(c){
+    CO=c; const d=DATA[c];
+    document.getElementById('sw-k').classList.toggle('on',c==='k');
+    document.getElementById('sw-u').classList.toggle('on',c==='u');
+    document.getElementById('brandName').textContent=d.name;
+    document.getElementById('logoTxt').textContent=d.logo;
+    document.getElementById('heroTag').textContent=d.tag;
+    document.getElementById('heroH1').textContent=d.h1;
+    document.getElementById('heroLead').textContent=d.lead;
+    document.getElementById('svcTitle').textContent=d.svcTitle;
+    document.getElementById('svcSub').textContent=d.svcSub;
+    document.getElementById('ctName').textContent=d.full;
+    document.getElementById('footName').textContent=d.name;
+    document.getElementById('erpCo').textContent=d.name;
+    document.getElementById('dashTitle').textContent=d.name+'　營運儀表板';
+    document.getElementById('stats').innerHTML=d.stats.map(s=>`<div><b>${s[0]}</b><span>${s[1]}</span></div>`).join('');
+    document.getElementById('svcGrid').innerHTML=d.svc.map(s=>`<div class="card"><div class="ic">${s[0]}</div><h3>${s[1]}</h3><p>${s[2]}</p></div>`).join('');
+    document.getElementById('projGrid').innerHTML=d.proj.map(p=>`<div class="pcard"><div class="ph">${p[0]}</div><div class="pb"><b>${p[1]}</b><span>業主：${p[2]}</span><span class="tg">${p[3]}</span></div></div>`).join('');
+  }
+  function openErp(){document.getElementById('site').classList.add('hide');document.getElementById('erp').classList.add('show');window.scrollTo(0,0);}
+  function closeErp(){document.getElementById('erp').classList.remove('show');document.getElementById('site').classList.remove('hide');window.scrollTo(0,0);}
+  function erpNav(v){
+    document.querySelectorAll('.side a').forEach(a=>a.classList.toggle('on',a.dataset.v===v));
+    document.querySelectorAll('.erp-view').forEach(el=>el.classList.remove('on'));
+    document.getElementById('v-'+v).classList.add('on');
+    document.querySelector('.main').scrollTop=0;
+  }
+  setCo('k');
+</script>
+</body>
+</html>

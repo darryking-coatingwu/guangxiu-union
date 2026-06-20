@@ -1,0 +1,7 @@
+# 工具與暫存，不上線
+開工.bat
+部署.bat
+.~lock.*
+*.tmp
+Thumbs.db
+.DS_Store
