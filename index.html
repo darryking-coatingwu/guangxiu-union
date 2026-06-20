@@ -29,6 +29,16 @@
   .btn-erp{background:var(--accent);color:#fff !important;font-weight:800;padding:9px 17px !important;border-radius:7px}
   .btn-erp:hover{background:var(--accent2) !important}
 
+  /* mobile topbar: wrap rows, hide text links, keep ERP login button full-width */
+  @media(max-width:760px){
+    .topbar .wrap{height:auto;flex-wrap:wrap;gap:9px;padding:10px 14px}
+    .brand{font-size:17px}
+    .switch{margin-left:auto}
+    nav.main{margin-left:0;width:100%;gap:6px;flex-wrap:wrap}
+    nav.main a:not(.btn-erp){display:none}
+    .btn-erp{width:100%;text-align:center;padding:12px 0 !important;font-size:15px}
+  }
+
   /* hero */
   .hero{position:relative;color:#fff;padding:78px 0 70px;
     background:linear-gradient(115deg,#0f2840 0%,#1d4870 60%,#2c5d8c 100%);overflow:hidden}
