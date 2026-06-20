@@ -140,6 +140,55 @@
   .erp-view{display:none}.erp-view.on{display:block}
   .note{font-size:12.5px;color:var(--muted);margin-top:10px}
   .demoflag{position:fixed;bottom:14px;right:14px;background:#13314f;color:#ffd9bf;font-size:12px;font-weight:700;padding:7px 14px;border-radius:30px;z-index:99;border:1px solid var(--accent)}
+
+  /* hamburger button + drawer overlay (hidden on desktop) */
+  .menu-btn{display:none;background:none;border:0;font-size:22px;color:var(--navy);cursor:pointer;padding:4px 8px;line-height:1}
+  .side-overlay{display:none}
+
+  /* ===== MOBILE-FIRST RESPONSIVE (phone is primary) ===== */
+  @media(max-width:860px){
+    /* public site hero/sections scale down */
+    .hero{padding:54px 0 46px}
+    .hero h1{font-size:29px}
+    .hero p.lead{font-size:15.5px}
+    .hero .cta a{padding:12px 18px;font-size:14px}
+    .stats{gap:24px;margin-top:30px}
+    .stats div b{font-size:25px}
+    section.blk{padding:44px 0}
+    h2.sec{font-size:23px}
+    .cbox{padding:22px}
+    .demoflag{font-size:11px;padding:6px 11px;bottom:10px;right:10px}
+
+    /* ERP top bar */
+    .menu-btn{display:block}
+    .erp-top{gap:10px;padding:0 12px}
+    .erp-top .b{display:none}
+    .erp-top .pill{font-size:12px;padding:4px 10px}
+
+    /* sidebar becomes a slide-in drawer */
+    .erp-body{display:block}
+    .side{position:fixed;top:60px;left:-264px;bottom:0;width:244px;z-index:40;
+      overflow-y:auto;transition:left .25s ease;box-shadow:2px 0 18px rgba(0,0,0,.28)}
+    .side.open{left:0}
+    .side a{font-size:15.5px;padding:13px 14px}
+    .side-overlay.open{display:block;position:fixed;top:60px;left:0;right:0;bottom:0;
+      background:rgba(0,0,0,.45);z-index:35}
+
+    /* main content */
+    .main{padding:18px 14px}
+    .ptitle{font-size:20px;margin-bottom:16px}
+    .kpis{grid-template-columns:1fr 1fr;gap:11px;margin-bottom:18px}
+    .kpi{padding:14px}
+    .kpi b{font-size:21px}
+    .panel{padding:15px}
+    .panel h4{font-size:15px}
+    /* tables scroll sideways instead of squeezing */
+    .panel table{display:block;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch}
+  }
+  @media(max-width:400px){
+    .kpis{grid-template-columns:1fr}
+    .hero h1{font-size:26px}
+  }
 </style>
 </head>
 <body>
@@ -228,6 +277,7 @@
 <!-- ============ ERP ============ -->
 <div class="erp" id="erp">
   <div class="erp-top">
+    <button class="menu-btn" onclick="toggleSide()" aria-label="選單">☰</button>
     <span class="b">營運管理系統 ERP</span>
     <span class="pill" id="erpCo">廣修企業</span>
     <div class="right">
@@ -236,7 +286,8 @@
     </div>
   </div>
   <div class="erp-body">
-    <div class="side">
+    <div class="side-overlay" id="sideOverlay" onclick="toggleSide()"></div>
+    <div class="side" id="side">
       <div class="grp">總覽</div>
       <a class="on" data-v="dash" onclick="erpNav('dash')"><span class="e">▦</span>儀表板</a>
       <div class="grp">營運</div>
@@ -480,13 +531,16 @@
     document.getElementById('svcGrid').innerHTML=d.svc.map(s=>`<div class="card"><div class="ic">${s[0]}</div><h3>${s[1]}</h3><p>${s[2]}</p></div>`).join('');
     document.getElementById('projGrid').innerHTML=d.proj.map(p=>`<div class="pcard"><div class="ph">${p[0]}</div><div class="pb"><b>${p[1]}</b><span>業主：${p[2]}</span><span class="tg">${p[3]}</span></div></div>`).join('');
   }
-  function openErp(){document.getElementById('site').classList.add('hide');document.getElementById('erp').classList.add('show');window.scrollTo(0,0);}
-  function closeErp(){document.getElementById('erp').classList.remove('show');document.getElementById('site').classList.remove('hide');window.scrollTo(0,0);}
+  function openErp(){document.getElementById('site').classList.add('hide');document.getElementById('erp').classList.add('show');closeSide();window.scrollTo(0,0);}
+  function closeErp(){document.getElementById('erp').classList.remove('show');document.getElementById('site').classList.remove('hide');closeSide();window.scrollTo(0,0);}
+  function toggleSide(){document.getElementById('side').classList.toggle('open');document.getElementById('sideOverlay').classList.toggle('open');}
+  function closeSide(){document.getElementById('side').classList.remove('open');document.getElementById('sideOverlay').classList.remove('open');}
   function erpNav(v){
     document.querySelectorAll('.side a').forEach(a=>a.classList.toggle('on',a.dataset.v===v));
     document.querySelectorAll('.erp-view').forEach(el=>el.classList.remove('on'));
     document.getElementById('v-'+v).classList.add('on');
     document.querySelector('.main').scrollTop=0;
+    closeSide();
   }
   setCo('k');
 </script>
