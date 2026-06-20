@@ -105,7 +105,7 @@
       body:JSON.stringify({empno:no,password:pw})})
     .then(function(r){return r.json();})
     .then(function(d){
-      if(d.ok){ ME={empno:d.empno,name:d.name,role:d.role,perm:d.perm,token:d.token};
+      if(d.ok){ ME={empno:d.empno,name:d.name,role:d.role,perm:d.perm,must_change:d.must_change,token:d.token};
         localStorage.setItem('gx_me',JSON.stringify(ME)); enterApp(); }
       else $('loginErr').textContent=d.error||'登入失敗';
     }).catch(function(){$('loginErr').textContent='連線失敗，請檢查網路';});
@@ -118,6 +118,7 @@
     $('topR').style.display='flex';
     $('meTxt').textContent='編號 '+ME.empno+'　'+(ME.name||'')+(ME.role?'（'+ME.role+'）':'');
     locate();
+    if(ME&&ME.must_change){setTimeout(function(){toast('首次登入，請先修改密碼');changePw();},500);}
   }
 
   function changePw(){
@@ -130,7 +131,7 @@
       body:JSON.stringify({empno:ME.empno,token:ME.token,newPassword:np})})
     .then(function(r){return r.json();})
     .then(function(d){
-      if(d.ok){ ME.token=d.token; localStorage.setItem('gx_me',JSON.stringify(ME)); toast('密碼已更新'); }
+      if(d.ok){ ME.token=d.token; ME.must_change=0; localStorage.setItem('gx_me',JSON.stringify(ME)); toast('密碼已更新'); }
       else toast(d.error||'更新失敗');
     }).catch(function(){toast('連線失敗');});
   }

@@ -192,6 +192,23 @@
     .panel table{display:block;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch}
   }
   @media(max-width:400px){.kpis{grid-template-columns:1fr}.hero h1{font-size:25px}}
+
+  /* ===== 企業系統登入 / 改密碼 閘門 ===== */
+  .erpauth{display:none;position:fixed;inset:0;z-index:200;background:rgba(10,22,36,.62);backdrop-filter:blur(3px);align-items:center;justify-content:center;padding:20px}
+  .erpauth.show{display:flex}
+  .ea-card{background:#fff;width:100%;max-width:380px;border-radius:16px;padding:30px 26px;box-shadow:0 20px 60px rgba(0,0,0,.32);animation:eaPop .18s ease}
+  @keyframes eaPop{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .ea-logo{width:46px;height:46px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;color:#fff;font-weight:900;font-size:22px;margin:0 auto 14px}
+  .ea-card h3{text-align:center;font-size:20px;font-weight:800;color:var(--navy)}
+  .ea-sub{text-align:center;font-size:13px;color:var(--muted);margin:6px 4px 18px;line-height:1.5}
+  .ea-card label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bottom:6px}
+  .ea-card input{width:100%;padding:12px;border:1px solid var(--line);border-radius:9px;font-size:16px;font-family:inherit;margin-bottom:13px}
+  .ea-card input:focus{outline:none;border-color:var(--navy2)}
+  .ea-btn{width:100%;padding:13px;border:0;border-radius:10px;background:var(--navy);color:#fff;font-weight:800;font-size:16px;cursor:pointer;font-family:inherit}
+  .ea-btn:hover{background:var(--navy2)}
+  .ea-err{color:var(--accent);font-size:13px;min-height:18px;margin-bottom:4px;font-weight:700}
+  .ea-cancel{display:block;text-align:center;color:var(--muted);font-size:13px;font-weight:700;margin-top:14px;cursor:pointer}
+  .ea-cancel:hover{color:var(--navy)}
 </style>
 </head>
 <body>
@@ -210,7 +227,7 @@
         <a onclick="goSec('projects')">工程實績</a>
         <a onclick="goSec('faq')">常見問題</a>
         <a onclick="goSec('contact')">聯絡我們</a>
-        <a class="btn-erp" onclick="openErp()">登入企業系統</a>
+        <a class="btn-erp" onclick="eaStart()">登入企業系統</a>
       </nav>
     </div>
   </div>
@@ -369,6 +386,37 @@
   </footer>
 </div>
 
+<!-- ============== 企業系統登入 / 改密碼 閘門 ============== -->
+<div class="erpauth" id="erpAuth">
+  <div class="ea-card">
+    <div class="ea-logo">廣</div>
+    <!-- 登入 -->
+    <div id="eaLogin">
+      <h3>登入企業系統</h3>
+      <p class="ea-sub">請輸入您的員工編號與密碼</p>
+      <label>員工編號</label>
+      <input id="eaNo" inputmode="numeric" placeholder="例如 007（管理員請輸入 000）">
+      <label>密碼</label>
+      <input id="eaPw" type="password" placeholder="預設 1234" onkeydown="if(event.key==='Enter')eaLogin()">
+      <div class="ea-err" id="eaErr"></div>
+      <button class="ea-btn" onclick="eaLogin()">登入</button>
+      <span class="ea-cancel" onclick="eaClose()">取消</span>
+    </div>
+    <!-- 改密碼 -->
+    <div id="eaChpw" style="display:none">
+      <h3>設定新密碼</h3>
+      <p class="ea-sub" id="eaChpwSub">為了帳號安全，首次登入請先修改密碼。</p>
+      <label>新密碼（至少 4 碼）</label>
+      <input id="eaNew1" type="password" placeholder="輸入新密碼">
+      <label>再次輸入新密碼</label>
+      <input id="eaNew2" type="password" placeholder="再輸入一次" onkeydown="if(event.key==='Enter')eaChangePw()">
+      <div class="ea-err" id="eaChErr"></div>
+      <button class="ea-btn" onclick="eaChangePw()">儲存並進入系統</button>
+      <span class="ea-cancel" id="eaSkip" onclick="eaEnter()">之後再改，先進入系統 →</span>
+    </div>
+  </div>
+</div>
+
 <!-- ================= ERP（內部平台入口） ================= -->
 <div class="erp" id="erp">
   <div class="erp-top">
@@ -377,6 +425,7 @@
     <span class="pill" id="erpCo">廣修企業</span>
     <div class="right">
       <span class="back" onclick="closeErp()">← 回到官網</span>
+      <span class="back" onclick="eaLogout()">登出</span>
       <div class="avatar">廣</div>
     </div>
   </div>
@@ -542,6 +591,66 @@
 
   function togglePnav(){document.getElementById('pnav').classList.toggle('open');}
   function goSec(id){document.getElementById('pnav').classList.remove('open');document.getElementById(id).scrollIntoView({behavior:'smooth'});}
+
+  // ===== 企業系統登入 / 改密碼 閘門 =====
+  var GX_API="https://guangxiu-punch.coating-wu.workers.dev";
+  var GX_ME=null;
+  (function(){try{GX_ME=JSON.parse(localStorage.getItem('gx_me')||'null');}catch(e){GX_ME=null;}})();
+  function $g(id){return document.getElementById(id);}
+
+  function eaStart(){
+    $g('pnav').classList.remove('open');
+    if(GX_ME&&GX_ME.token){                 // 已登入
+      if(GX_ME.empno==='000'||!GX_ME.must_change){openErp();return;} // 管理員或已改過密碼→直接進
+      $g('erpAuth').classList.add('show');eaShowChpw();return;        // 仍是預設密碼→強制改
+    }
+    $g('eaErr').textContent='';$g('eaPw').value='';
+    $g('eaLogin').style.display='block';$g('eaChpw').style.display='none';
+    $g('erpAuth').classList.add('show');setTimeout(function(){$g('eaNo').focus();},50);
+  }
+  function eaClose(){$g('erpAuth').classList.remove('show');}
+  function eaLogin(){
+    var no=$g('eaNo').value.trim(),pw=$g('eaPw').value;
+    if(!no||!pw){$g('eaErr').textContent='請輸入編號與密碼';return;}
+    $g('eaErr').textContent='登入中…';
+    fetch(GX_API+'/api/login',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({empno:no,password:pw})})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d.ok){
+        GX_ME={empno:d.empno,name:d.name,role:d.role,perm:d.perm,must_change:d.must_change,token:d.token};
+        localStorage.setItem('gx_me',JSON.stringify(GX_ME));
+        if(d.empno==='000'||!d.must_change){eaClose();openErp();}
+        else eaShowChpw();
+      } else $g('eaErr').textContent=d.error||'登入失敗';
+    }).catch(function(){$g('eaErr').textContent='連線失敗，請檢查網路';});
+  }
+  function eaShowChpw(){
+    $g('eaLogin').style.display='none';$g('eaChpw').style.display='block';
+    $g('eaChErr').textContent='';$g('eaNew1').value='';$g('eaNew2').value='';
+    if(GX_ME&&GX_ME.must_change){
+      $g('eaSkip').style.display='none';
+      $g('eaChpwSub').textContent='您目前使用預設密碼，請先設定新密碼才能進入系統。';
+    }else{
+      $g('eaSkip').style.display='block';
+      $g('eaChpwSub').textContent='可在此修改密碼，或直接進入系統。';
+    }
+    setTimeout(function(){$g('eaNew1').focus();},50);
+  }
+  function eaChangePw(){
+    var p1=$g('eaNew1').value,p2=$g('eaNew2').value;
+    if(p1.length<4){$g('eaChErr').textContent='新密碼至少 4 碼';return;}
+    if(p1!==p2){$g('eaChErr').textContent='兩次密碼不一致';return;}
+    if(p1==='1234'){$g('eaChErr').textContent='不能沿用預設密碼 1234';return;}
+    $g('eaChErr').textContent='儲存中…';
+    fetch(GX_API+'/api/change-password',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({empno:GX_ME.empno,token:GX_ME.token,newPassword:p1})})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d.ok){GX_ME.token=d.token;GX_ME.must_change=0;localStorage.setItem('gx_me',JSON.stringify(GX_ME));eaEnter();}
+      else $g('eaChErr').textContent=d.error||'更新失敗';
+    }).catch(function(){$g('eaChErr').textContent='連線失敗';});
+  }
+  function eaEnter(){eaClose();openErp();}
+  function eaLogout(){localStorage.removeItem('gx_me');GX_ME=null;closeErp();}
 
   function openErp(){document.getElementById('pnav').classList.remove('open');document.getElementById('site').classList.add('hide');document.getElementById('erp').classList.add('show');closeSide();window.scrollTo(0,0);}
   function closeErp(){document.getElementById('erp').classList.remove('show');document.getElementById('site').classList.remove('hide');closeSide();window.scrollTo(0,0);}
