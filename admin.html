@@ -209,10 +209,20 @@
         var tb=document.getElementById('ubody');
         document.getElementById('uempty').style.display=d.rows.length?'none':'block';
         tb.innerHTML=d.rows.map(function(u){
-          return '<tr><td><b>'+u.empno+'</b></td><td>'+(u.name||'')+'</td><td>'+(u.role||'')+'</td><td>'+permLabel(u.perm)+'</td>'+
+          var sel='<select onchange="setPerm(\''+u.empno+'\',this.value)" style="padding:5px 8px;border:1px solid var(--line);border-radius:6px;font-family:inherit;font-size:13px;background:#fff">'+
+            '<option value="admin"'+(u.perm==='admin'?' selected':'')+'>管理層</option>'+
+            '<option value="manager"'+(u.perm==='manager'?' selected':'')+'>主管/行政</option>'+
+            '<option value="staff"'+((u.perm==='staff'||!u.perm)?' selected':'')+'>員工</option></select>';
+          return '<tr><td><b>'+u.empno+'</b></td><td>'+(u.name||'')+'</td><td>'+(u.role||'')+'</td><td>'+sel+'</td>'+
             '<td><a style="cursor:pointer;color:var(--navy2);font-weight:700" onclick="resetPw(\''+u.empno+'\')">重設密碼</a></td></tr>';
         }).join('');
       }).catch(function(){alert('連線失敗');});
+  }
+  function setPerm(empno,perm){
+    fetch(API_BASE+'/api/admin/set-perm?key='+encodeURIComponent(KEY),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({empno:empno,perm:perm})})
+      .then(function(r){return r.json();})
+      .then(function(d){ if(!d.ok)alert('失敗：'+(d.error||'')); })
+      .catch(function(){alert('連線失敗');});
   }
   function resetPw(empno){
     if(!confirm('把編號 '+empno+' 的密碼重設為 1234？')) return;
