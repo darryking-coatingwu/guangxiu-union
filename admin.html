@@ -72,8 +72,20 @@
         <button onclick="load()">查詢</button>
         <button class="ghost" onclick="clearF()">清除</button>
         <button class="ghost" onclick="exportCSV()">匯出 CSV</button>
-        <button class="ghost" onclick="seedUsers()">初始化員工 001-100</button>
       </div>
+    </div>
+
+    <div class="card">
+      <h4>👥 員工名錄與權限
+        <button class="ghost" style="font-size:12px;padding:6px 12px;margin-left:8px" onclick="loadUsers()">載入 / 重新整理</button>
+        <button class="ghost" style="font-size:12px;padding:6px 12px" onclick="seedRoster()">建立 / 重設名錄（18人）</button>
+      </h4>
+      <div class="tw">
+        <table><thead><tr><th>編號</th><th>姓名</th><th>職稱</th><th>權限</th><th>操作</th></tr></thead>
+        <tbody id="ubody"></tbody></table>
+      </div>
+      <div class="empty" id="uempty">按「載入 / 重新整理」顯示員工名錄</div>
+      <div class="note" style="font-size:12px;color:var(--muted);margin-top:8px">權限分級：管理層＝董事長/總經理/副總經理（看全部、管理員工）；主管/行政＝工務經理/特助/會計；員工＝領班/技工/移工（只打卡）。</div>
     </div>
 
     <div class="kpis">
@@ -116,6 +128,7 @@
         document.getElementById('app').style.display='block';
         document.getElementById('logout').style.display='inline';
         setTimeout(initMap,50);
+        loadUsers();
       }else{document.getElementById('loginErr').textContent='密碼錯誤或連線失敗';}
     });
   }
@@ -180,11 +193,32 @@
     if(pts.length)map.fitBounds(pts,{padding:[40,40],maxZoom:16});
   }
 
-  function seedUsers(){
-    if(!confirm('建立員工帳號 001~100（預設密碼 1234）？\n已存在、已改過密碼的員工不會被覆蓋。')) return;
-    fetch(API_BASE+'/api/admin/seed?key='+encodeURIComponent(KEY),{method:'POST'})
+  function permLabel(p){return p==='admin'?'管理層':(p==='manager'?'主管/行政':'員工');}
+  function seedRoster(){
+    if(!confirm('建立 / 重設員工名錄（18 人）？\n所有人密碼會設成 1234（已改過的也會被重設）。')) return;
+    fetch(API_BASE+'/api/admin/seed-roster?key='+encodeURIComponent(KEY),{method:'POST'})
       .then(function(r){return r.json();})
-      .then(function(d){ alert(d.ok?(d.message+'\n目前員工數：'+d.total):('失敗：'+(d.error||''))); })
+      .then(function(d){ alert(d.ok?d.message:('失敗：'+(d.error||''))); if(d.ok)loadUsers(); })
+      .catch(function(){alert('連線失敗');});
+  }
+  function loadUsers(){
+    fetch(API_BASE+'/api/admin/users?key='+encodeURIComponent(KEY))
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(!d.ok){alert(d.error||'讀取失敗');return;}
+        var tb=document.getElementById('ubody');
+        document.getElementById('uempty').style.display=d.rows.length?'none':'block';
+        tb.innerHTML=d.rows.map(function(u){
+          return '<tr><td><b>'+u.empno+'</b></td><td>'+(u.name||'')+'</td><td>'+(u.role||'')+'</td><td>'+permLabel(u.perm)+'</td>'+
+            '<td><a style="cursor:pointer;color:var(--navy2);font-weight:700" onclick="resetPw(\''+u.empno+'\')">重設密碼</a></td></tr>';
+        }).join('');
+      }).catch(function(){alert('連線失敗');});
+  }
+  function resetPw(empno){
+    if(!confirm('把編號 '+empno+' 的密碼重設為 1234？')) return;
+    fetch(API_BASE+'/api/admin/reset-pw?key='+encodeURIComponent(KEY),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({empno:empno})})
+      .then(function(r){return r.json();})
+      .then(function(d){alert(d.ok?d.message:('失敗：'+(d.error||'')));})
       .catch(function(){alert('連線失敗');});
   }
   function exportCSV(){

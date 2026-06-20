@@ -105,7 +105,7 @@
       body:JSON.stringify({empno:no,password:pw})})
     .then(function(r){return r.json();})
     .then(function(d){
-      if(d.ok){ ME={empno:d.empno,name:d.name,token:d.token};
+      if(d.ok){ ME={empno:d.empno,name:d.name,role:d.role,perm:d.perm,token:d.token};
         localStorage.setItem('gx_me',JSON.stringify(ME)); enterApp(); }
       else $('loginErr').textContent=d.error||'登入失敗';
     }).catch(function(){$('loginErr').textContent='連線失敗，請檢查網路';});
@@ -116,7 +116,7 @@
     $('loginView').classList.add('hide');
     $('punchView').classList.remove('hide');
     $('topR').style.display='flex';
-    $('meTxt').textContent='編號 '+ME.empno+'　'+(ME.name||'');
+    $('meTxt').textContent='編號 '+ME.empno+'　'+(ME.name||'')+(ME.role?'（'+ME.role+'）':'');
     locate();
   }
 
