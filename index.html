@@ -72,7 +72,9 @@
   .about .lead2.muted{color:var(--muted);font-size:15px}
   .feat{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:30px}
   @media(max-width:700px){.feat{grid-template-columns:1fr}}
-  .feat .card{background:var(--bg)}
+  .feat .card{background:var(--bg);padding:0;overflow:hidden}
+  .feat .card .cimg{width:100%;height:188px;object-fit:cover;display:block;background:#dfe6ed}
+  .feat .card .cbody{padding:20px 22px 24px}
 
   /* band */
   .band{background:#0f2840;color:#fff}
@@ -87,7 +89,8 @@
   .projects{background:var(--bg)}
   .pcard{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;transition:.18s}
   .pcard:hover{box-shadow:0 10px 24px rgba(19,49,79,.10);transform:translateY(-3px)}
-  .pcard .ph{height:118px;background:linear-gradient(135deg,#22577f,#13314f);display:grid;place-items:center;color:#86a8c6;font-size:40px}
+  .pcard .ph{position:relative;height:160px;background:linear-gradient(135deg,#22577f,#13314f);display:grid;place-items:center;color:#86a8c6;font-size:40px}
+  .pcard .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
   .pcard .pb{padding:15px 18px}
   .pcard .pb b{font-size:15.5px;color:var(--navy)}
   .pcard .pb .tg{display:inline-block;margin-top:9px;font-size:11.5px;color:var(--accent);border:1px solid var(--accent);padding:2px 9px;border-radius:20px}
@@ -258,9 +261,9 @@
       <p class="lead2">廣修企業有限公司擁有三十多年施工經驗，專門從事結構工程補強、混凝土切割、混凝土取樣、裂縫灌注等工程，重視施工品質與專業技術。</p>
       <p class="lead2 muted">適用範圍涵蓋混凝土結構與鋼板結構的切割、鑽孔、取樣、補強與植入工程。我們服務公共工程、建設公司、營造業，以及與新舊建物耐震補強或結構變更相關的各類工程需求單位。</p>
       <div class="feat">
-        <div class="card"><div class="ic">🏗️</div><h3>三十多年實務經驗</h3><p>長期投入結構補強與切割取樣，工法純熟、判斷精準，能因應各種現場條件。</p></div>
-        <div class="card"><div class="ic">🛡️</div><h3>重視施工品質</h3><p>從取樣數據到補強施作，每一道工序講究確實，把結構安全放在第一位。</p></div>
-        <div class="card"><div class="ic">🧰</div><h3>專業技術範圍廣</h3><p>混凝土與鋼板結構的切割、鑽孔、取樣、補強、植入一條龍，單一窗口完成。</p></div>
+        <div class="card"><img class="cimg" src="images/about/exp.jpg" alt="三十多年實務經驗" loading="lazy"><div class="cbody"><h3>三十多年實務經驗</h3><p>長期投入結構補強與切割取樣，工法純熟、判斷精準，能因應各種現場條件。</p></div></div>
+        <div class="card"><img class="cimg" src="images/about/quality.jpg" alt="重視施工品質" loading="lazy"><div class="cbody"><h3>重視施工品質</h3><p>從取樣數據到補強施作，每一道工序講究確實，把結構安全放在第一位。</p></div></div>
+        <div class="card"><img class="cimg" src="images/about/scope.jpg" alt="專業技術範圍廣" loading="lazy"><div class="cbody"><h3>專業技術範圍廣</h3><p>混凝土與鋼板結構的切割、鑽孔、取樣、補強、植入一條龍，單一窗口完成。</p></div></div>
       </div>
     </div>
   </section>
@@ -575,18 +578,19 @@
 </div>
 
 <script>
+  var IMGBASE = "https://www.arch-world.com.tw/manage/VipAddProducts/";
   var PROJ = [
-    ["🪜","樓層鋼構樓梯工程","鋼構"],
-    ["🏭","廠房鋼架結構工程","鋼架結構"],
-    ["💉","混凝土牆結構高壓灌注補強工程","高壓灌注"],
-    ["🚇","隧道混凝土牆面填縫工程","填縫"],
-    ["🧵","鋼筋混凝土樑柱碳纖維補強工程","碳纖維補強"],
-    ["🔩","混凝土結構植筋補強工程","植筋補強"],
-    ["🛡️","樑柱鋼板結構補強工程","鋼板補強"],
-    ["🪚","混凝土結構切割鑽孔工程","切割鑽孔"]
+    ["🪜","樓層鋼構樓梯工程","鋼構","682B.jpg"],
+    ["🏭","廠房鋼架結構工程","鋼架結構","683B.jpg"],
+    ["💉","混凝土牆結構高壓灌注補強工程","高壓灌注","684B.jpg"],
+    ["🚇","隧道混凝土牆面填縫工程","填縫","685B.gif"],
+    ["🧵","鋼筋混凝土樑柱碳纖維補強工程","碳纖維補強","5827B.jpg"],
+    ["🔩","混凝土結構植筋補強工程","植筋補強","5828B.jpg"],
+    ["🛡️","樑柱鋼板結構補強工程","鋼板補強","5829B.jpg"],
+    ["🪚","混凝土結構切割鑽孔工程","切割鑽孔","5830B.jpg"]
   ];
   document.getElementById('projGrid').innerHTML = PROJ.map(function(p){
-    return '<div class="pcard"><div class="ph">'+p[0]+'</div><div class="pb"><b>'+p[1]+'</b><br><span class="tg">'+p[2]+'</span></div></div>';
+    return '<div class="pcard"><div class="ph">'+p[0]+'<img src="'+IMGBASE+p[3]+'" alt="'+p[1]+'" loading="lazy" onerror="this.remove()"></div><div class="pb"><b>'+p[1]+'</b><br><span class="tg">'+p[2]+'</span></div></div>';
   }).join('');
 
   function togglePnav(){document.getElementById('pnav').classList.toggle('open');}
