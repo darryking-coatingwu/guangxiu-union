@@ -15,72 +15,50 @@
   .top a{margin-left:auto;color:#bcd0e2;font-size:13px;font-weight:700}
   .box{max-width:520px;margin:0 auto;padding:16px}
   .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
-
   .who label{font-size:13px;font-weight:700;color:var(--muted);display:block;margin-bottom:6px}
   .who select{width:100%;padding:12px;border:1px solid var(--line);border-radius:9px;font-size:16px;font-family:inherit;background:#fff}
-
   .status{text-align:center;padding:6px 0 2px}
-  .ring{width:120px;height:120px;border-radius:50%;margin:6px auto 12px;display:grid;place-items:center;
-    border:7px solid var(--line);transition:.3s}
+  .ring{width:118px;height:118px;border-radius:50%;margin:6px auto 12px;display:grid;place-items:center;border:7px solid var(--line);transition:.3s}
   .ring.ok{border-color:var(--ok)} .ring.bad{border-color:var(--bad)} .ring.wait{border-color:var(--warn)}
   .ring b{font-size:15px;font-weight:800}
   .ring.ok b{color:var(--ok)} .ring.bad b{color:var(--bad)} .ring.wait b{color:var(--warn)}
-  .dist{font-size:14px;color:var(--muted);margin-bottom:2px}
-  .dist b{color:var(--ink)}
+  .loc{font-size:14px;color:var(--muted);margin-bottom:3px}.loc b{color:var(--ink)}
   .acc{font-size:12px;color:var(--muted)}
-  .relocate{display:inline-block;margin-top:10px;color:var(--navy2);font-weight:700;font-size:13.5px;border:1px solid var(--line);padding:7px 14px;border-radius:20px;background:#f6f9fb;cursor:pointer}
-
-  .btns{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
+  .maplink{display:inline-block;margin-top:8px;color:var(--navy2);font-weight:700;font-size:13.5px;text-decoration:underline}
+  .relocate{display:block;margin:12px auto 0;color:var(--navy2);font-weight:700;font-size:13.5px;border:1px solid var(--line);padding:7px 14px;border-radius:20px;background:#f6f9fb;cursor:pointer;width:fit-content}
+  .btns{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
   .btns button{padding:18px 0;border:0;border-radius:12px;font-size:18px;font-weight:800;color:#fff;font-family:inherit;cursor:pointer}
   .bin{background:var(--ok)} .bout{background:var(--navy)}
   .btns button:disabled{opacity:.45}
-
-  h4{font-size:14px;font-weight:800;color:var(--navy);margin-bottom:10px;display:flex;align-items:center;gap:7px}
-  .rec{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+  h4{font-size:14px;font-weight:800;color:var(--navy);margin-bottom:10px}
+  .rec{padding:11px 0;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
   .rec:last-child{border-bottom:0}
-  .rec .t{font-weight:800;width:52px}
-  .rec .ty{font-weight:700}
+  .rec .t{font-weight:800;width:50px}.rec .ty{font-weight:700}
   .rec .ty.in{color:var(--ok)} .rec .ty.out{color:var(--navy2)}
-  .rec .st{margin-left:auto;font-size:12px;font-weight:700;padding:2px 9px;border-radius:20px}
-  .st.ok{background:#e4f5ec;color:var(--ok)} .st.out{background:#fce8e6;color:var(--bad)}
+  .rec a{margin-left:auto;font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:16px;border:1px solid var(--line);color:var(--navy2);background:#f6f9fb}
   .empty{color:var(--muted);font-size:13.5px;text-align:center;padding:8px}
-
   .note{background:#fff7ef;border:1px solid #f3d8bd;color:#8a5a2b;font-size:12.5px;border-radius:10px;padding:11px 13px;margin-bottom:14px}
-
-  details.set summary{font-size:13.5px;font-weight:700;color:var(--navy2);cursor:pointer;list-style:none}
-  details.set summary::-webkit-details-marker{display:none}
-  details.set summary::before{content:"⚙ ";}
-  .setrow{font-size:13px;color:var(--muted);margin:10px 0 6px}
-  .pt{display:flex;align-items:center;gap:8px;font-size:13.5px;padding:8px 0;border-bottom:1px dashed var(--line)}
-  .pt b{color:var(--ink)}
-  .pt .rm{margin-left:auto;color:var(--bad);font-weight:700;cursor:pointer;font-size:12px}
-  .setbtn{margin-top:10px;width:100%;padding:11px;border:1px solid var(--navy2);color:var(--navy2);background:#f6f9fb;border-radius:9px;font-weight:700;font-family:inherit;cursor:pointer;font-size:13.5px}
+  .warn{background:#fdecea;border:1px solid #f3c2bb;color:#a23a2c;font-size:12.5px;border-radius:10px;padding:11px 13px;margin-bottom:14px;display:none}
   .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(80px);background:var(--navy);color:#fff;padding:13px 22px;border-radius:30px;font-weight:700;font-size:15px;opacity:0;transition:.3s;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.3)}
   .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 </style>
 </head>
 <body>
-  <div class="top">
-    <span class="lg">廣</span><b>GPS 定位打卡</b>
-    <a href="index.html">回首頁</a>
-  </div>
-
+  <div class="top"><span class="lg">廣</span><b>GPS 定位打卡</b><a href="index.html">回首頁</a></div>
   <div class="box">
+    <div class="warn" id="cfgWarn">⚠ 後端尚未設定：請先完成 Cloudflare 部署，並把 Worker 網址填進本檔最上面的 API_BASE。</div>
+    <div class="note">打卡會把「人員 + 時間 + GPS 位置」寫進公司雲端資料庫，公司後台即可看到。可隨時打卡，不限地點。</div>
 
-    <div class="note">前端示範版：打卡紀錄目前存在「這支手機」本機。要做全公司共用、老闆看得到所有人紀錄，需接後端資料庫（建議 Cloudflare D1，與大大力 ERP 同一套）。</div>
-
-    <div class="card who">
-      <label>打卡人員</label>
-      <select id="emp">
-        <option>林志成</option><option>陳建宏</option><option>王大維</option><option>張惠玲</option>
-      </select>
+    <div class="card who"><label>打卡人員</label>
+      <select id="emp"><option>林志成</option><option>陳建宏</option><option>王大維</option><option>張惠玲</option></select>
     </div>
 
     <div class="card">
       <div class="status">
         <div class="ring wait" id="ring"><b id="ringTxt">定位中…</b></div>
-        <div class="dist" id="distTxt">正在取得您的位置…</div>
+        <div class="loc" id="locTxt">正在取得您的位置…</div>
         <div class="acc" id="accTxt"></div>
+        <a class="maplink" id="mapLink" style="display:none" target="_blank">📍 在地圖查看目前位置</a>
         <span class="relocate" onclick="locate()">↻ 重新定位</span>
       </div>
       <div class="btns">
@@ -89,134 +67,69 @@
       </div>
     </div>
 
-    <div class="card">
-      <h4>📋 今日打卡紀錄</h4>
-      <div id="recs"><div class="empty">今天還沒有打卡紀錄</div></div>
-    </div>
-
-    <div class="card">
-      <details class="set">
-        <summary>打卡地點設定（管理用）</summary>
-        <div class="setrow">允許打卡的地點與半徑。站在現場按「設為目前位置」即可校正座標。</div>
-        <div id="ptList"></div>
-        <button class="setbtn" onclick="addPoint()">＋ 用目前位置新增打卡點</button>
-      </details>
-    </div>
-
+    <div class="card"><h4>📋 本次打卡</h4><div id="recs"><div class="empty">尚未打卡</div></div></div>
   </div>
-
   <div class="toast" id="toast"></div>
 
 <script>
-  // ---------- 預設打卡點（座標為概略值，請站在現場用「設為目前位置」校正）----------
-  var DEF_POINTS = [
-    {name:"廣修公司（五股）", lat:25.0780, lng:121.4350, radius:150}
-  ];
-  var LS_PT="gx_punch_points", LS_REC="gx_punch_recs";
+  /* ★★★ 部署 Worker 後，把你的 Worker 網址貼到這裡（結尾不要加斜線）★★★ */
+  var API_BASE = "https://guangxiu-punch.coating-wu.workers.dev";
 
-  function getPoints(){try{return JSON.parse(localStorage.getItem(LS_PT))||DEF_POINTS;}catch(e){return DEF_POINTS;}}
-  function setPoints(p){localStorage.setItem(LS_PT,JSON.stringify(p));}
-  function getRecs(){try{return JSON.parse(localStorage.getItem(LS_REC))||[];}catch(e){return [];}}
-  function setRecs(r){localStorage.setItem(LS_REC,JSON.stringify(r));}
-
-  var cur=null; // 目前定位 {lat,lng,acc}
-  var nearest=null, nearestDist=null, inRange=false;
-
-  function haversine(a,b,c,d){
-    var R=6371000, t=Math.PI/180;
-    var dLat=(c-a)*t, dLng=(d-b)*t;
-    var x=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(a*t)*Math.cos(c*t)*Math.sin(dLng/2)*Math.sin(dLng/2);
-    return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
-  }
-
-  function locate(){
-    var ring=document.getElementById('ring'), rt=document.getElementById('ringTxt');
-    ring.className='ring wait'; rt.textContent='定位中…';
-    document.getElementById('distTxt').textContent='正在取得您的位置…';
-    document.getElementById('accTxt').textContent='';
-    setBtns(false);
-    if(!navigator.geolocation){fail('此裝置不支援定位');return;}
-    navigator.geolocation.getCurrentPosition(function(pos){
-      cur={lat:pos.coords.latitude,lng:pos.coords.longitude,acc:pos.coords.accuracy};
-      evaluate();
-    },function(err){
-      fail(err.code===1?'您拒絕了定位權限，請到瀏覽器設定開啟':'定位失敗，請到空曠處再試');
-    },{enableHighAccuracy:true,timeout:12000,maximumAge:0});
-  }
-
-  function fail(msg){
-    document.getElementById('ring').className='ring bad';
-    document.getElementById('ringTxt').textContent='定位失敗';
-    document.getElementById('distTxt').textContent=msg;
-    setBtns(false);
-  }
-
-  function evaluate(){
-    var pts=getPoints();
-    nearest=null; nearestDist=Infinity;
-    pts.forEach(function(p){
-      var d=haversine(cur.lat,cur.lng,p.lat,p.lng);
-      if(d<nearestDist){nearestDist=d;nearest=p;}
-    });
-    inRange = nearest && nearestDist<=nearest.radius;
-    var ring=document.getElementById('ring'), rt=document.getElementById('ringTxt');
-    if(inRange){ring.className='ring ok';rt.textContent='在範圍內';}
-    else{ring.className='ring bad';rt.textContent='超出範圍';}
-    document.getElementById('distTxt').innerHTML='距「'+(nearest?nearest.name:'-')+'」約 <b>'+Math.round(nearestDist)+' 公尺</b>（允許 '+(nearest?nearest.radius:0)+' m）';
-    document.getElementById('accTxt').textContent='定位誤差約 ±'+Math.round(cur.acc)+' m';
-    setBtns(true);
-    renderPts();
-  }
+  var cur=null, session=[];
+  function mapUrl(la,ln){return "https://www.google.com/maps?q="+la+","+ln;}
   function setBtns(on){document.getElementById('btnIn').disabled=!on;document.getElementById('btnOut').disabled=!on;}
 
+  if(API_BASE.indexOf('REPLACE_ME')>=0){document.getElementById('cfgWarn').style.display='block';}
+
+  function locate(){
+    var ring=document.getElementById('ring'),rt=document.getElementById('ringTxt');
+    ring.className='ring wait';rt.textContent='定位中…';
+    document.getElementById('locTxt').textContent='正在取得您的位置…';
+    document.getElementById('accTxt').textContent='';document.getElementById('mapLink').style.display='none';
+    setBtns(false);
+    if(!navigator.geolocation){fail('此裝置不支援定位');return;}
+    navigator.geolocation.getCurrentPosition(function(p){
+      cur={lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy};
+      ring.className='ring ok';rt.textContent='定位成功';
+      document.getElementById('locTxt').innerHTML='座標 <b>'+cur.lat.toFixed(5)+', '+cur.lng.toFixed(5)+'</b>';
+      document.getElementById('accTxt').textContent='定位誤差約 ±'+Math.round(cur.acc)+' m';
+      var ml=document.getElementById('mapLink');ml.href=mapUrl(cur.lat,cur.lng);ml.style.display='inline-block';
+      setBtns(true);
+    },function(e){fail(e.code===1?'您拒絕了定位權限，請到瀏覽器設定開啟':'定位失敗，請到空曠處再試');},
+    {enableHighAccuracy:true,timeout:12000,maximumAge:0});
+  }
+  function fail(m){document.getElementById('ring').className='ring bad';document.getElementById('ringTxt').textContent='定位失敗';document.getElementById('locTxt').textContent=m;setBtns(false);}
+
   function punch(type){
-    if(!cur){toast('尚未取得定位');return;}
-    if(!inRange){ if(!confirm('您目前超出打卡範圍（約 '+Math.round(nearestDist)+' m），仍要打卡並標記為「範圍外」嗎？')) return; }
-    var now=new Date();
-    var rec={emp:document.getElementById('emp').value,type:type,
-      time:now.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',hour12:false}),
-      date:now.toISOString().slice(0,10),
-      point:nearest?nearest.name:'-', dist:Math.round(nearestDist), status:inRange?'ok':'out'};
-    var recs=getRecs(); recs.unshift(rec); setRecs(recs);
-    renderRecs();
-    toast((type==='in'?'上班':'下班')+'打卡成功 '+rec.time);
+    if(!cur){toast('尚未取得定位，請按重新定位');return;}
+    if(API_BASE.indexOf('REPLACE_ME')>=0){toast('後端尚未設定，無法打卡');return;}
+    setBtns(false);
+    fetch(API_BASE+'/api/punch',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({emp:document.getElementById('emp').value,type:type,lat:cur.lat,lng:cur.lng,acc:Math.round(cur.acc)})})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      setBtns(true);
+      if(d.ok){
+        var now=new Date();
+        session.unshift({type:type,time:now.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',hour12:false}),lat:cur.lat,lng:cur.lng});
+        renderRecs();
+        toast((type==='in'?'上班':'下班')+'打卡成功');
+      } else { toast('打卡失敗：'+(d.error||'')); }
+    })
+    .catch(function(){setBtns(true);toast('連線失敗，請檢查網路');});
   }
 
   function renderRecs(){
-    var today=new Date().toISOString().slice(0,10);
-    var recs=getRecs().filter(function(r){return r.date===today;});
     var el=document.getElementById('recs');
-    if(!recs.length){el.innerHTML='<div class="empty">今天還沒有打卡紀錄</div>';return;}
-    el.innerHTML=recs.map(function(r){
-      return '<div class="rec"><span class="t">'+r.time+'</span>'+
-        '<span class="ty '+r.type+'">'+(r.type==='in'?'上班':'下班')+'</span>'+
-        '<span style="color:var(--muted);font-size:13px">'+r.emp+' · '+r.point+' '+r.dist+'m</span>'+
-        '<span class="st '+(r.status==='ok'?'ok':'out')+'">'+(r.status==='ok'?'範圍內':'範圍外')+'</span></div>';
+    if(!session.length){el.innerHTML='<div class="empty">尚未打卡</div>';return;}
+    el.innerHTML=session.map(function(r){
+      return '<div class="rec"><span class="t">'+r.time+'</span><span class="ty '+r.type+'">'+(r.type==='in'?'上班':'下班')+'</span>'+
+        '<a target="_blank" href="'+mapUrl(r.lat,r.lng)+'">📍地圖</a></div>';
     }).join('');
   }
 
-  function renderPts(){
-    var pts=getPoints();
-    document.getElementById('ptList').innerHTML=pts.map(function(p,i){
-      return '<div class="pt"><b>'+p.name+'</b>'+
-        '<span style="color:var(--muted)">'+p.lat.toFixed(5)+', '+p.lng.toFixed(5)+' · '+p.radius+'m</span>'+
-        '<span class="rm" onclick="rmPoint('+i+')">刪除</span></div>';
-    }).join('') || '<div class="empty">尚無打卡點</div>';
-  }
-  function addPoint(){
-    if(!cur){toast('請先成功定位');return;}
-    var name=prompt('打卡點名稱（例：廣修公司、板橋工地）');
-    if(!name) return;
-    var r=prompt('允許半徑（公尺）','150'); r=parseInt(r)||150;
-    var pts=getPoints(); pts.push({name:name,lat:cur.lat,lng:cur.lng,radius:r}); setPoints(pts);
-    evaluate(); toast('已新增打卡點：'+name);
-  }
-  function rmPoint(i){var pts=getPoints();pts.splice(i,1);setPoints(pts);renderPts();if(cur)evaluate();}
-
-  var tT;
-  function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tT);tT=setTimeout(function(){t.classList.remove('show');},2200);}
-
-  renderRecs(); renderPts(); locate();
+  var tT;function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tT);tT=setTimeout(function(){t.classList.remove('show');},2400);}
+  locate();
 </script>
 </body>
 </html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>廣修企業 · 打卡後台</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+  :root{--navy:#13314f;--navy2:#1d4870;--accent:#e8772e;--accent2:#f0913f;
+    --bg:#eef2f6;--ink:#1b2733;--muted:#647284;--line:#dde4ea;--ok:#2f9e6f;--bad:#c0492b;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Noto Sans TC","Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+  .top{background:var(--navy);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:1000}
+  .top .lg{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-weight:900}
+  .top b{font-size:17px;font-weight:800}
+  .top .out{margin-left:auto;color:#bcd0e2;font-size:13px;font-weight:700;cursor:pointer}
+  .box{max-width:1080px;margin:0 auto;padding:18px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:18px;margin-bottom:16px}
+
+  /* login */
+  #login{max-width:380px;margin:60px auto;text-align:center}
+  #login h2{font-size:20px;color:var(--navy);margin-bottom:6px}
+  #login p{color:var(--muted);font-size:13.5px;margin-bottom:18px}
+  #login input{width:100%;padding:13px;border:1px solid var(--line);border-radius:9px;font-size:16px;margin-bottom:12px;font-family:inherit}
+  #login button{width:100%;padding:13px;border:0;border-radius:9px;background:var(--navy);color:#fff;font-weight:800;font-size:16px;cursor:pointer;font-family:inherit}
+  .err{color:var(--bad);font-size:13px;margin-bottom:10px;min-height:18px}
+
+  .filters{display:flex;gap:12px;flex-wrap:wrap;align-items:end}
+  .filters .f{display:flex;flex-direction:column;gap:5px}
+  .filters label{font-size:12px;font-weight:700;color:var(--muted)}
+  .filters select,.filters input{padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:14px;font-family:inherit;background:#fff}
+  .filters button{padding:9px 16px;border:0;border-radius:8px;background:var(--accent);color:#fff;font-weight:800;cursor:pointer;font-family:inherit}
+  .filters .ghost{background:#f6f9fb;color:var(--navy2);border:1px solid var(--line)}
+
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+  @media(max-width:760px){.kpis{grid-template-columns:1fr 1fr}}
+  .kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
+  .kpi span{color:var(--muted);font-size:12.5px;font-weight:600}.kpi b{display:block;font-size:24px;font-weight:900;color:var(--navy);margin-top:4px}
+
+  #map{height:340px;border-radius:12px;border:1px solid var(--line);margin-bottom:0}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{text-align:left;padding:10px 9px;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{color:var(--muted);font-size:12px;background:#f8fafc;position:sticky;top:0}
+  .tw{overflow-x:auto}
+  .badge{font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:16px}
+  .b-in{background:#e4f5ec;color:var(--ok)} .b-out{background:#e7eef6;color:var(--navy2)}
+  td a{color:var(--navy2);font-weight:700}
+  .empty{color:var(--muted);text-align:center;padding:24px;font-size:14px}
+  h4{font-size:15px;font-weight:800;color:var(--navy);margin-bottom:12px}
+</style>
+</head>
+<body>
+  <div class="top"><span class="lg">廣</span><b>廣修企業 · 打卡後台</b><span class="out" id="logout" style="display:none" onclick="logout()">登出</span></div>
+
+  <!-- 登入 -->
+  <div class="box" id="login">
+    <div class="card">
+      <h2>公司後台登入</h2>
+      <p>請輸入後台密碼</p>
+      <div class="err" id="loginErr"></div>
+      <input type="password" id="key" placeholder="後台密碼" onkeydown="if(event.key==='Enter')login()">
+      <button onclick="login()">登入</button>
+    </div>
+  </div>
+
+  <!-- 主畫面 -->
+  <div class="box" id="app" style="display:none">
+    <div class="card">
+      <div class="filters">
+        <div class="f"><label>員工</label><select id="fEmp"><option value="">全部</option></select></div>
+        <div class="f"><label>日期</label><input type="date" id="fDate"></div>
+        <button onclick="load()">查詢</button>
+        <button class="ghost" onclick="clearF()">清除</button>
+        <button class="ghost" onclick="exportCSV()">匯出 CSV</button>
+      </div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi"><span>總打卡筆數</span><b id="kTotal">0</b></div>
+      <div class="kpi"><span>上班</span><b id="kIn">0</b></div>
+      <div class="kpi"><span>下班</span><b id="kOut">0</b></div>
+      <div class="kpi"><span>打卡人數</span><b id="kPpl">0</b></div>
+    </div>
+
+    <div class="card"><h4>🗺 打卡位置總覽</h4><div id="map"></div></div>
+
+    <div class="card">
+      <h4>📋 打卡明細</h4>
+      <div class="tw">
+        <table>
+          <thead><tr><th>時間</th><th>員工</th><th>類別</th><th>定位誤差</th><th>位置</th></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="empty" style="display:none">查無打卡資料</div>
+    </div>
+  </div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  /* ★★★ 跟 punch.html 填同一個 Worker 網址 ★★★ */
+  var API_BASE = "https://guangxiu-punch.coating-wu.workers.dev";
+
+  var KEY="", rows=[], map=null, markers=[];
+
+  function login(){
+    var k=document.getElementById('key').value.trim();
+    if(!k){return;}
+    KEY=k;
+    document.getElementById('loginErr').textContent='登入中…';
+    load(function(ok){
+      if(ok){
+        sessionStorage.setItem('gx_key',k);
+        document.getElementById('login').style.display='none';
+        document.getElementById('app').style.display='block';
+        document.getElementById('logout').style.display='inline';
+        setTimeout(initMap,50);
+      }else{document.getElementById('loginErr').textContent='密碼錯誤或連線失敗';}
+    });
+  }
+  function logout(){sessionStorage.removeItem('gx_key');location.reload();}
+  function clearF(){document.getElementById('fEmp').value='';document.getElementById('fDate').value='';load();}
+
+  function fmtTime(iso){var d=new Date(iso);return d.toLocaleString('zh-TW',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false});}
+
+  function load(cb){
+    if(API_BASE.indexOf('REPLACE_ME')>=0){if(cb)cb(false);alert('後端尚未設定，請先填 API_BASE');return;}
+    var emp=document.getElementById('fEmp')?document.getElementById('fEmp').value:'';
+    var date=document.getElementById('fDate')?document.getElementById('fDate').value:'';
+    var u=API_BASE+'/api/punches?key='+encodeURIComponent(KEY);
+    if(emp)u+='&emp='+encodeURIComponent(emp);
+    if(date)u+='&date='+encodeURIComponent(date);
+    fetch(u).then(function(r){return r.json();}).then(function(d){
+      if(!d.ok){if(cb)cb(false);return;}
+      rows=d.rows||[];
+      render();
+      if(cb)cb(true);
+    }).catch(function(){if(cb)cb(false);});
+  }
+
+  function render(){
+    // 員工下拉（首次/每次以全部資料補齊）
+    var sel=document.getElementById('fEmp'); var have={}; for(var i=1;i<sel.options.length;i++)have[sel.options[i].value]=1;
+    rows.forEach(function(r){if(!have[r.emp]){have[r.emp]=1;var o=document.createElement('option');o.value=r.emp;o.textContent=r.emp;sel.appendChild(o);}});
+
+    document.getElementById('kTotal').textContent=rows.length;
+    document.getElementById('kIn').textContent=rows.filter(function(r){return r.type==='in';}).length;
+    document.getElementById('kOut').textContent=rows.filter(function(r){return r.type==='out';}).length;
+    var ppl={};rows.forEach(function(r){ppl[r.emp]=1;});
+    document.getElementById('kPpl').textContent=Object.keys(ppl).length;
+
+    var tb=document.getElementById('tbody');
+    document.getElementById('empty').style.display=rows.length?'none':'block';
+    tb.innerHTML=rows.map(function(r){
+      var loc=(r.lat!=null)?'<a target="_blank" href="https://www.google.com/maps?q='+r.lat+','+r.lng+'">📍地圖</a>':'—';
+      return '<tr><td>'+fmtTime(r.punched_at)+'</td><td><b>'+r.emp+'</b></td>'+
+        '<td><span class="badge '+(r.type==='in'?'b-in">上班':'b-out">下班')+'</span></td>'+
+        '<td>'+(r.acc!=null?'±'+r.acc+'m':'—')+'</td><td>'+loc+'</td></tr>';
+    }).join('');
+    drawMap();
+  }
+
+  function initMap(){
+    if(map)return;
+    map=L.map('map').setView([25.078,121.435],12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map);
+    drawMap();
+  }
+  function drawMap(){
+    if(!map)return;
+    markers.forEach(function(m){map.removeLayer(m);});markers=[];
+    var pts=[];
+    rows.forEach(function(r){
+      if(r.lat==null)return;
+      var m=L.marker([r.lat,r.lng]).addTo(map)
+        .bindPopup('<b>'+r.emp+'</b><br>'+(r.type==='in'?'上班':'下班')+'<br>'+fmtTime(r.punched_at)+'<br>±'+(r.acc||'?')+'m');
+      markers.push(m);pts.push([r.lat,r.lng]);
+    });
+    if(pts.length)map.fitBounds(pts,{padding:[40,40],maxZoom:16});
+  }
+
+  function exportCSV(){
+    var head=['時間','員工','類別','緯度','經度','誤差m'];
+    var lines=[head.join(',')];
+    rows.forEach(function(r){
+      lines.push([fmtTime(r.punched_at),r.emp,(r.type==='in'?'上班':'下班'),r.lat,r.lng,r.acc].join(','));
+    });
+    var blob=new Blob(['﻿'+lines.join('\n')],{type:'text/csv;charset=utf-8'});
+    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='廣修打卡_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+  }
+
+  // 自動登入（同次瀏覽器）
+  (function(){var k=sessionStorage.getItem('gx_key');if(k){document.getElementById('key').value=k;login();}})();
+</script>
+</body>
+</html>

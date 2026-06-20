@@ -1,6 +1,10 @@
 # 工具與暫存，不上線
 開工.bat
 部署.bat
+修復上線_只跑一次.bat
+
+# Cloudflare 後端（用 wrangler 部署，不上傳到網站，內含密碼設定）
+punch-backend/
 .~lock.*
 *.tmp
 Thumbs.db
