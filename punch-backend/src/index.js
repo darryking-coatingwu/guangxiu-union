@@ -218,6 +218,16 @@ export default {
           return json({ ok: true, id: res.meta.last_row_id });
         }
       }
+      // ===== 案場 刪除（限主管/管理層）=====
+      if (url.pathname === "/api/sites/delete" && request.method === "POST") {
+        await ensureSites(env);
+        const b = await request.json();
+        const caller = isAdmin() ? { empno: "000", perm: "admin" } : await authUser(env, b.empno, b.token);
+        if (!caller || (caller.perm !== "admin" && caller.perm !== "manager")) return json({ error: "沒有管理案場權限" }, 403);
+        if (!b.id) return json({ error: "缺少案場" }, 400);
+        await env.DB.prepare("DELETE FROM sites WHERE id=?").bind(parseInt(b.id, 10)).run();
+        return json({ ok: true });
+      }
       // ===== 班表查詢（所有人可看，班表公開）=====
       if (url.pathname === "/api/schedule/list" && request.method === "POST") {
         await ensureSchedule(env); await ensureSites(env);

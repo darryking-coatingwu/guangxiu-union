@@ -621,8 +621,9 @@
           <div id="siteFormWrap" style="display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-bottom:14px">
             <input type="hidden" id="siteId">
             <div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:11.5px;color:var(--muted);font-weight:700">案場名稱</label><input id="siteName" placeholder="例如 南區大樓補強" style="padding:8px 10px;border:1px solid var(--line);border-radius:7px;font-family:inherit"></div>
-            <div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:11.5px;color:var(--muted);font-weight:700">工地地址</label><input id="siteAddr" placeholder="新北市..." style="padding:8px 10px;border:1px solid var(--line);border-radius:7px;width:220px;font-family:inherit"></div>
-            <div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:11.5px;color:var(--muted);font-weight:700">座標(選填) 緯度,經度</label><input id="siteLL" placeholder="25.077,121.435" style="padding:8px 10px;border:1px solid var(--line);border-radius:7px;font-family:inherit"></div>
+            <div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:11.5px;color:var(--muted);font-weight:700">工地地址（填完自動帶座標）</label><input id="siteAddr" placeholder="新北市五股區中興路一段49號" onblur="siteGeoBlur()" style="padding:8px 10px;border:1px solid var(--line);border-radius:7px;width:240px;font-family:inherit"></div>
+            <div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:11.5px;color:var(--muted);font-weight:700">座標(自動/可手填)</label><input id="siteLL" placeholder="25.077,121.435" style="padding:8px 10px;border:1px solid var(--line);border-radius:7px;font-family:inherit"></div>
+            <button class="ea-btn" style="background:#f6f9fb;color:var(--navy2);border:1px solid var(--line)" onclick="siteGeo()">地址→座標</button>
             <button class="ea-btn" onclick="siteSave()">儲存案場</button>
             <button class="ea-btn" style="background:#f6f9fb;color:var(--navy2);border:1px solid var(--line)" onclick="siteClear()">清空</button>
           </div>
@@ -764,7 +765,7 @@
     tb.innerHTML=GX_SITES.map(function(s){
       var ll=(s.lat!=null)?(s.lat.toFixed(4)+','+s.lng.toFixed(4)):'—';
       var st=s.status==='done'?'<span class="sst done">完工</span>':'<span class="sst act">進行中</span>';
-      var ops=canEdit?('<a style="cursor:pointer;color:var(--navy2);font-weight:700" onclick="siteEdit('+s.id+')">編輯</a> ｜ <a style="cursor:pointer;color:var(--navy2);font-weight:700" onclick="siteToggle('+s.id+',\''+(s.status==='done'?'active':'done')+'\')">'+(s.status==='done'?'復工':'完工')+'</a>'):'—';
+      var ops=canEdit?('<a style="cursor:pointer;color:var(--navy2);font-weight:700" onclick="siteEdit('+s.id+')">編輯</a> ｜ <a style="cursor:pointer;color:var(--navy2);font-weight:700" onclick="siteToggle('+s.id+',\''+(s.status==='done'?'active':'done')+'\')">'+(s.status==='done'?'復工':'完工')+'</a> ｜ <a style="cursor:pointer;color:#c0492b;font-weight:700" onclick="siteDelete('+s.id+',\''+s.name.replace(/'/g,'')+'\')">刪除</a>'):'—';
       return '<tr><td style="text-align:left"><b>'+s.name+'</b></td><td style="text-align:left">'+(s.address||'—')+'</td><td>'+ll+'</td><td>'+st+'</td><td>'+ops+'</td></tr>';
     }).join('');
   }
@@ -779,6 +780,20 @@
   function siteToggle(id,status){var s=GX_SITES.filter(function(x){return x.id===id;})[0];if(!s)return;
     fetch(GX_API+'/api/sites/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({empno:GX_ME.empno,token:GX_ME.token,id:id,name:s.name,address:s.address,lat:s.lat,lng:s.lng,status:status})})
     .then(function(r){return r.json();}).then(function(d){if(d.ok)loadSitesMgmt();else alert('失敗：'+(d.error||''));}).catch(function(){alert('連線失敗');});}
+  function siteDelete(id,name){
+    if(!confirm('確定刪除案場「'+name+'」？此動作無法復原。'))return;
+    fetch(GX_API+'/api/sites/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({empno:GX_ME.empno,token:GX_ME.token,id:id})})
+    .then(function(r){return r.json();}).then(function(d){if(d.ok)loadSitesMgmt();else alert('失敗：'+(d.error||''));}).catch(function(){alert('連線失敗');});
+  }
+  function doGeo(a,silent){
+    fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=tw&q='+encodeURIComponent(a),{headers:{'Accept':'application/json'}})
+    .then(function(r){return r.json();}).then(function(arr){
+      if(arr&&arr[0]){$g('siteLL').value=parseFloat(arr[0].lat).toFixed(6)+','+parseFloat(arr[0].lon).toFixed(6);}
+      else if(!silent){alert('查不到此地址座標，請確認地址，或之後在工地用手機座標手填');}
+    }).catch(function(){if(!silent)alert('座標查詢失敗（網路或服務忙），可手動填');});
+  }
+  function siteGeo(){var a=$g('siteAddr').value.trim();if(!a){alert('請先填地址');return;}doGeo(a,false);}
+  function siteGeoBlur(){if($g('siteLL').value.trim())return;var a=$g('siteAddr').value.trim();if(a)doGeo(a,true);}
 
   // ===== 案場排班 =====
   var SH_ROSTER=[

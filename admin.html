@@ -94,8 +94,9 @@
       <div class="siteform">
         <input type="hidden" id="siteId">
         <div class="f"><label>案場名稱</label><input id="siteName" placeholder="例如 南區大樓補強"></div>
-        <div class="f"><label>工地地址</label><input id="siteAddr" placeholder="新北市..." style="width:220px"></div>
-        <div class="f"><label>座標(選填) 緯度,經度</label><input id="siteLatLng" placeholder="25.077,121.435"></div>
+        <div class="f"><label>工地地址（填完自動帶座標）</label><input id="siteAddr" placeholder="新北市五股區中興路一段49號" onblur="siteGeoBlur()" style="width:240px"></div>
+        <div class="f"><label>座標(自動/可手填)</label><input id="siteLatLng" placeholder="25.077,121.435"></div>
+        <button class="ghost btn" onclick="siteGeo()">地址→座標</button>
         <button class="btn" onclick="saveSite()">儲存案場</button>
         <button class="ghost btn" onclick="clearSiteForm()">清空</button>
       </div>
@@ -275,7 +276,7 @@
       var st=s.status==='done'?'<span class="pill2 p-done">完工</span>':'<span class="pill2 p-active">進行中</span>';
       var toggle=s.status==='done'?'復工':'標完工';
       return '<tr><td><b>'+s.name+'</b></td><td>'+(s.address||'—')+'</td><td>'+ll+'</td><td>'+st+'</td>'+
-        '<td><a style="cursor:pointer" onclick=\'editSite('+s.id+')\'>編輯</a> ｜ <a style="cursor:pointer" onclick="toggleSite('+s.id+',\''+(s.status==='done'?'active':'done')+'\')">'+toggle+'</a></td></tr>';
+        '<td><a style="cursor:pointer" onclick=\'editSite('+s.id+')\'>編輯</a> ｜ <a style="cursor:pointer" onclick="toggleSite('+s.id+',\''+(s.status==='done'?'active':'done')+'\')">'+toggle+'</a> ｜ <a style="cursor:pointer;color:#c0492b" onclick="deleteSite('+s.id+',\''+s.name.replace(/'/g,'')+'\')">刪除</a></td></tr>';
     }).join('');
   }
   function editSite(id){var s=SITES.filter(function(x){return x.id===id;})[0];if(!s)return;
@@ -293,6 +294,18 @@
   function toggleSite(id,status){var s=SITES.filter(function(x){return x.id===id;})[0];if(!s)return;
     fetch(API_BASE+'/api/sites/save'+k(),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:id,name:s.name,address:s.address,lat:s.lat,lng:s.lng,status:status})})
     .then(function(r){return r.json();}).then(function(d){if(d.ok)loadSites();else alert('失敗：'+(d.error||''));}).catch(function(){alert('連線失敗');});}
+  function deleteSite(id,name){
+    if(!confirm('確定刪除案場「'+name+'」？此動作無法復原。'))return;
+    fetch(API_BASE+'/api/sites/delete'+k(),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:id})})
+    .then(function(r){return r.json();}).then(function(d){if(d.ok)loadSites();else alert('失敗：'+(d.error||''));}).catch(function(){alert('連線失敗');});}
+  function doGeo(a,silent){
+    fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=tw&q='+encodeURIComponent(a),{headers:{'Accept':'application/json'}})
+    .then(function(r){return r.json();}).then(function(arr){
+      if(arr&&arr[0]){$('siteLatLng').value=parseFloat(arr[0].lat).toFixed(6)+','+parseFloat(arr[0].lon).toFixed(6);}
+      else if(!silent)alert('查不到此地址座標，請確認地址或手填');
+    }).catch(function(){if(!silent)alert('座標查詢失敗，可手填');});}
+  function siteGeo(){var a=$('siteAddr').value.trim();if(!a){alert('請先填地址');return;}doGeo(a,false);}
+  function siteGeoBlur(){if($('siteLatLng').value.trim())return;var a=$('siteAddr').value.trim();if(a)doGeo(a,true);}
 
   // ===== 班表 grid =====
   function weekShift(delta){
