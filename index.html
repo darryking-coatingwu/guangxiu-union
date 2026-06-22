@@ -785,13 +785,21 @@
     fetch(GX_API+'/api/sites/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({empno:GX_ME.empno,token:GX_ME.token,id:id})})
     .then(function(r){return r.json();}).then(function(d){if(d.ok)loadSitesMgmt();else alert('失敗：'+(d.error||''));}).catch(function(){alert('連線失敗');});
   }
-  function doGeo(a,silent){
-    fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=tw&q='+encodeURIComponent(a),{headers:{'Accept':'application/json'}})
+  function geoSetLL(lat,lon){$g('siteLL').value=parseFloat(lat).toFixed(6)+','+parseFloat(lon).toFixed(6);}
+  function geoQueries(a){var qs=[a];var s1=a.replace(/[0-9０-９]+\s*[號巷弄].*$/,'').trim();if(s1&&qs.indexOf(s1)<0)qs.push(s1);var s2=s1.replace(/[一二三四五六七八九十0-9０-９]+\s*段.*$/,'').trim();if(s2&&qs.indexOf(s2)<0)qs.push(s2);return qs;}
+  function geoTry(qs,i,silent,setfn){
+    if(i>=qs.length){if(!silent)alert('查不到此地址座標。建議只填到「路段」（例：新北市五股區中興路一段），或到工地用手機打卡頁顯示的座標手填。');return;}
+    var q=encodeURIComponent(qs[i]+' 台灣');
+    fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=tw&q='+q,{headers:{'Accept':'application/json'}})
     .then(function(r){return r.json();}).then(function(arr){
-      if(arr&&arr[0]){$g('siteLL').value=parseFloat(arr[0].lat).toFixed(6)+','+parseFloat(arr[0].lon).toFixed(6);}
-      else if(!silent){alert('查不到此地址座標，請確認地址，或之後在工地用手機座標手填');}
-    }).catch(function(){if(!silent)alert('座標查詢失敗（網路或服務忙），可手動填');});
+      if(arr&&arr[0]){setfn(arr[0].lat,arr[0].lon);return;}
+      fetch('https://photon.komoot.io/api/?limit=1&q='+q).then(function(r){return r.json();}).then(function(d){
+        if(d&&d.features&&d.features[0]){var c=d.features[0].geometry.coordinates;setfn(c[1],c[0]);}
+        else geoTry(qs,i+1,silent,setfn);
+      }).catch(function(){geoTry(qs,i+1,silent,setfn);});
+    }).catch(function(){geoTry(qs,i+1,silent,setfn);});
   }
+  function doGeo(a,silent){geoTry(geoQueries(a),0,silent,geoSetLL);}
   function siteGeo(){var a=$g('siteAddr').value.trim();if(!a){alert('請先填地址');return;}doGeo(a,false);}
   function siteGeoBlur(){if($g('siteLL').value.trim())return;var a=$g('siteAddr').value.trim();if(a)doGeo(a,true);}
 
