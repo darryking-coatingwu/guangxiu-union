@@ -2,10 +2,19 @@
 開工.bat
 部署.bat
 修復上線_只跑一次.bat
-
-# Cloudflare 後端（用 wrangler 部署，不上傳到網站，內含密碼設定）
-punch-backend/
 .~lock.*
 *.tmp
 Thumbs.db
 .DS_Store
+
+# Cloudflare 後端：程式碼（punch-backend/src/index.js、schema.sql）同步上 git，
+# 但「密碼設定檔」與套件不上傳。
+punch-backend/wrangler.toml
+punch-backend/node_modules/
+punch-backend/.wrangler/
+punch-backend/package-lock.json
+punch-backend/README-部署說明.md
+
+# 含後台密碼的說明文件，只留本機、不公開
+後端改版_部署SOP.md
+後端部署SOP_本機.md
