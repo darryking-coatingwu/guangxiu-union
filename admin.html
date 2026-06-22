@@ -7,87 +7,135 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
   :root{--navy:#13314f;--navy2:#1d4870;--accent:#e8772e;--accent2:#f0913f;
-    --bg:#eef2f6;--ink:#1b2733;--muted:#647284;--line:#dde4ea;--ok:#2f9e6f;--bad:#c0492b;}
+    --bg:#eef2f6;--ink:#1b2733;--muted:#647284;--line:#dde4ea;--ok:#2f9e6f;--bad:#c0492b;--warn:#d4892a;}
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:"Noto Sans TC","Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
   .top{background:var(--navy);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:1000}
   .top .lg{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-weight:900}
   .top b{font-size:17px;font-weight:800}
   .top .out{margin-left:auto;color:#bcd0e2;font-size:13px;font-weight:700;cursor:pointer}
-  .box{max-width:1080px;margin:0 auto;padding:18px}
+  .box{max-width:1180px;margin:0 auto;padding:18px}
   .card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:18px;margin-bottom:16px}
-
-  /* login */
   #login{max-width:380px;margin:60px auto;text-align:center}
   #login h2{font-size:20px;color:var(--navy);margin-bottom:6px}
   #login p{color:var(--muted);font-size:13.5px;margin-bottom:18px}
   #login input{width:100%;padding:13px;border:1px solid var(--line);border-radius:9px;font-size:16px;margin-bottom:12px;font-family:inherit}
   #login button{width:100%;padding:13px;border:0;border-radius:9px;background:var(--navy);color:#fff;font-weight:800;font-size:16px;cursor:pointer;font-family:inherit}
   .err{color:var(--bad);font-size:13px;margin-bottom:10px;min-height:18px}
-
   .filters{display:flex;gap:12px;flex-wrap:wrap;align-items:end}
   .filters .f{display:flex;flex-direction:column;gap:5px}
   .filters label{font-size:12px;font-weight:700;color:var(--muted)}
   .filters select,.filters input{padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:14px;font-family:inherit;background:#fff}
-  .filters button{padding:9px 16px;border:0;border-radius:8px;background:var(--accent);color:#fff;font-weight:800;cursor:pointer;font-family:inherit}
-  .filters .ghost{background:#f6f9fb;color:var(--navy2);border:1px solid var(--line)}
-
+  .btn{padding:9px 16px;border:0;border-radius:8px;background:var(--accent);color:#fff;font-weight:800;cursor:pointer;font-family:inherit;font-size:14px}
+  .ghost{background:#f6f9fb;color:var(--navy2);border:1px solid var(--line)}
   .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
   @media(max-width:760px){.kpis{grid-template-columns:1fr 1fr}}
   .kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
   .kpi span{color:var(--muted);font-size:12.5px;font-weight:600}.kpi b{display:block;font-size:24px;font-weight:900;color:var(--navy);margin-top:4px}
-
-  #map{height:340px;border-radius:12px;border:1px solid var(--line);margin-bottom:0}
+  #map{height:320px;border-radius:12px;border:1px solid var(--line)}
   table{width:100%;border-collapse:collapse;font-size:13.5px}
-  th,td{text-align:left;padding:10px 9px;border-bottom:1px solid var(--line);white-space:nowrap}
-  th{color:var(--muted);font-size:12px;background:#f8fafc;position:sticky;top:0}
+  th,td{text-align:left;padding:9px;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{color:var(--muted);font-size:12px;background:#f8fafc}
   .tw{overflow-x:auto}
   .badge{font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:16px}
   .b-in{background:#e4f5ec;color:var(--ok)} .b-out{background:#e7eef6;color:var(--navy2)}
-  .st-ontime{background:#dcfce7;color:#166534}.st-late{background:#fee2e2;color:#991b1b}.st-off{background:#fef3c7;color:#92520a}.st-noshift{background:#eef2f6;color:#647284}
-  .sh-tag{font-size:11.5px;font-weight:700}
+  .b-dev{background:#fee2e2;color:#991b1b}.b-ok2{background:#dcfce7;color:#166534}
+  .b-early{background:#fee2e2;color:#991b1b}
   td a{color:var(--navy2);font-weight:700}
-  .empty{color:var(--muted);text-align:center;padding:24px;font-size:14px}
+  .empty{color:var(--muted);text-align:center;padding:22px;font-size:14px}
   h4{font-size:15px;font-weight:800;color:var(--navy);margin-bottom:12px}
+  /* 案場管理 */
+  .siteform{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-bottom:12px}
+  .siteform .f{display:flex;flex-direction:column;gap:4px}
+  .siteform label{font-size:11.5px;font-weight:700;color:var(--muted)}
+  .siteform input{padding:8px 10px;border:1px solid var(--line);border-radius:7px;font-size:13.5px;font-family:inherit}
+  .pill2{font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px}
+  .p-active{background:#dcfce7;color:#166534}.p-done{background:#e5e7eb;color:#374151}
+  /* 班表 grid */
+  .gridwrap{overflow-x:auto}
+  table.grid{font-size:12.5px}
+  table.grid th,table.grid td{border:1px solid var(--line);text-align:center;padding:6px 5px;min-width:96px}
+  table.grid td.name{text-align:left;font-weight:700;background:#f8fafc;position:sticky;left:0;min-width:96px}
+  table.grid th.name{position:sticky;left:0;background:#eef2f6;z-index:2}
+  .cell{cursor:pointer;min-height:30px;border-radius:5px}
+  .cell:hover{background:#fff7ef}
+  .cell .s{display:block;font-weight:700;color:var(--navy)}
+  .cell .off2{color:#8a5a2b;font-weight:700}
+  .cell.empty2{color:#c3ccd5}
+  /* modal */
+  .ov{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:2000;padding:16px}
+  .ov.show{display:flex}
+  .modal{background:#fff;border-radius:14px;padding:20px;max-width:460px;width:100%;max-height:90vh;overflow:auto}
+  .modal h3{font-size:17px;color:var(--navy);margin-bottom:4px}
+  .modal .sub{font-size:13px;color:var(--muted);margin-bottom:14px}
+  .selrow{min-height:38px;border:1px dashed var(--line);border-radius:8px;padding:8px;margin-bottom:12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .chip{background:var(--navy);color:#fff;font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:14px}
+  .sitebtn{border:1px solid var(--line);background:#f6f9fb;color:var(--navy);font-weight:700;font-size:13px;padding:8px 12px;border-radius:9px;cursor:pointer;margin:3px}
+  .modal .acts{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
 </style>
 </head>
 <body>
   <div class="top"><span class="lg">廣</span><b>廣修企業 · 打卡後台</b><a class="out" href="index.html" style="margin-left:auto;margin-right:16px">← 回首頁</a><span class="out" id="logout" style="display:none" onclick="logout()">登出</span></div>
 
-  <!-- 登入 -->
   <div class="box" id="login">
     <div class="card">
-      <h2>公司後台登入</h2>
-      <p>請輸入後台密碼</p>
+      <h2>公司後台登入</h2><p>請輸入後台密碼</p>
       <div class="err" id="loginErr"></div>
       <input type="password" id="key" placeholder="後台密碼" onkeydown="if(event.key==='Enter')login()">
       <button onclick="login()">登入</button>
     </div>
   </div>
 
-  <!-- 主畫面 -->
   <div class="box" id="app" style="display:none">
+
+    <!-- 案場管理 -->
+    <div class="card">
+      <h4>🏗 案場管理</h4>
+      <div class="siteform">
+        <input type="hidden" id="siteId">
+        <div class="f"><label>案場名稱</label><input id="siteName" placeholder="例如 南區大樓補強"></div>
+        <div class="f"><label>工地地址</label><input id="siteAddr" placeholder="新北市..." style="width:220px"></div>
+        <div class="f"><label>座標(選填) 緯度,經度</label><input id="siteLatLng" placeholder="25.077,121.435"></div>
+        <button class="btn" onclick="saveSite()">儲存案場</button>
+        <button class="ghost btn" onclick="clearSiteForm()">清空</button>
+      </div>
+      <div class="tw">
+        <table><thead><tr><th>名稱</th><th>地址</th><th>座標</th><th>狀態</th><th>操作</th></tr></thead><tbody id="sbody"></tbody></table>
+      </div>
+      <div class="empty" id="sempty">尚無案場，請在上方新增</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px">座標選填；填了之後，員工打卡 GPS 離案場太遠（>300m）後台會標「偏離」。在工地時用手機打卡頁的座標填這裡最準。</div>
+    </div>
+
+    <!-- 班表（案場排班）-->
+    <div class="card">
+      <h4>🗓 班表（案場排班）
+        <button class="ghost btn" style="font-size:12px;padding:6px 10px;margin-left:8px" onclick="weekShift(-7)">← 上週</button>
+        <button class="ghost btn" style="font-size:12px;padding:6px 10px" onclick="weekShift(7)">下週 →</button>
+        <button class="ghost btn" style="font-size:12px;padding:6px 10px" onclick="weekShift(0)">本週</button>
+      </h4>
+      <div class="gridwrap"><table class="grid"><thead id="ghead"></thead><tbody id="gbody"></tbody></table></div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px">點任一格子排案場（可多個、有順序）或標休假。藍=案場、棕=休假。排班由管理層/工務經理操作，班表全員可看。</div>
+    </div>
+
+    <!-- 員工名錄與權限 -->
+    <div class="card">
+      <h4>👥 員工名錄與權限
+        <button class="ghost btn" style="font-size:12px;padding:6px 12px;margin-left:8px" onclick="loadUsers()">載入 / 重新整理</button>
+        <button class="ghost btn" style="font-size:12px;padding:6px 12px" onclick="seedRoster()">建立 / 重設名錄（18人）</button>
+      </h4>
+      <div class="tw"><table><thead><tr><th>編號</th><th>姓名</th><th>職稱</th><th>權限</th><th>操作</th></tr></thead><tbody id="ubody"></tbody></table></div>
+      <div class="empty" id="uempty">按「載入 / 重新整理」顯示員工名錄</div>
+    </div>
+
+    <!-- 打卡查詢 -->
     <div class="card">
       <div class="filters">
         <div class="f"><label>員工</label><select id="fEmp"><option value="">全部</option></select></div>
         <div class="f"><label>日期</label><input type="date" id="fDate"></div>
-        <button onclick="load()">查詢</button>
-        <button class="ghost" onclick="clearF()">清除</button>
-        <button class="ghost" onclick="exportCSV()">匯出 CSV</button>
+        <button class="btn" onclick="load()">查詢</button>
+        <button class="ghost btn" onclick="clearF()">清除</button>
+        <button class="ghost btn" onclick="exportCSV()">匯出 CSV</button>
       </div>
-    </div>
-
-    <div class="card">
-      <h4>👥 員工名錄與權限
-        <button class="ghost" style="font-size:12px;padding:6px 12px;margin-left:8px" onclick="loadUsers()">載入 / 重新整理</button>
-        <button class="ghost" style="font-size:12px;padding:6px 12px" onclick="seedRoster()">建立 / 重設名錄（18人）</button>
-      </h4>
-      <div class="tw">
-        <table><thead><tr><th>編號</th><th>姓名</th><th>職稱</th><th>權限</th><th>操作</th></tr></thead>
-        <tbody id="ubody"></tbody></table>
-      </div>
-      <div class="empty" id="uempty">按「載入 / 重新整理」顯示員工名錄</div>
-      <div class="note" style="font-size:12px;color:var(--muted);margin-top:8px">權限分級：管理層＝董事長/總經理/副總經理（看全部、管理員工）；主管/行政＝工務經理/特助/會計；員工＝領班/技工/移工（只打卡）。</div>
     </div>
 
     <div class="kpis">
@@ -102,153 +150,206 @@
     <div class="card">
       <h4>📋 打卡明細</h4>
       <div class="tw">
-        <table>
-          <thead><tr><th>時間</th><th>員工</th><th>類別</th><th>班別</th><th>狀態</th><th>定位誤差</th><th>位置</th></tr></thead>
-          <tbody id="tbody"></tbody>
-        </table>
+        <table><thead><tr><th>時間</th><th>員工</th><th>類別</th><th>案場</th><th>偏離</th><th>早退</th><th>位置</th></tr></thead>
+        <tbody id="tbody"></tbody></table>
       </div>
       <div class="empty" id="empty" style="display:none">查無打卡資料</div>
     </div>
   </div>
 
+  <!-- 排班 modal -->
+  <div class="ov" id="ov">
+    <div class="modal">
+      <h3 id="mTitle">排班</h3>
+      <div class="sub" id="mSub"></div>
+      <div class="selrow" id="mSel"></div>
+      <div id="mSites"></div>
+      <div class="acts">
+        <button class="btn" style="background:#8a5a2b" onclick="pickOff()">標休假</button>
+        <button class="ghost btn" onclick="clearSel()">清空</button>
+        <button class="btn" onclick="saveCell()">儲存</button>
+        <button class="ghost btn" onclick="closeOv()">取消</button>
+      </div>
+    </div>
+  </div>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  /* ★★★ 跟 punch.html 填同一個 Worker 網址 ★★★ */
   var API_BASE = "https://guangxiu-punch.coating-wu.workers.dev";
-
   var KEY="", rows=[], map=null, markers=[];
-  var SH_LABEL={M:'早班',E:'晚班',D:'全天',O:'休假',L:'請假','':'—'};
-  var ST_LABEL={ontime:'正常',late:'遲到',off:'休假打卡',noshift:'未排班'};
+  var USERS=[], SITES=[], SCHED={}, weekStart=null, curEmp=null, curDate=null, sel=[];
+
+  function $(id){return document.getElementById(id);}
+  function k(){return '?key='+encodeURIComponent(KEY);}
+  function pad(n){return (n<10?'0':'')+n;}
+  function fmtDate(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+  var WD=['日','一','二','三','四','五','六'];
 
   function login(){
-    var k=document.getElementById('key').value.trim();
-    if(!k){return;}
-    KEY=k;
-    document.getElementById('loginErr').textContent='登入中…';
+    var v=$('key').value.trim(); if(!v)return; KEY=v;
+    $('loginErr').textContent='登入中…';
     load(function(ok){
-      if(ok){
-        sessionStorage.setItem('gx_key',k);
-        document.getElementById('login').style.display='none';
-        document.getElementById('app').style.display='block';
-        document.getElementById('logout').style.display='inline';
-        setTimeout(initMap,50);
-        loadUsers();
-      }else{document.getElementById('loginErr').textContent='密碼錯誤或連線失敗';}
+      if(ok){ sessionStorage.setItem('gx_key',v);
+        $('login').style.display='none'; $('app').style.display='block'; $('logout').style.display='inline';
+        setTimeout(initMap,50); loadUsers(); loadSites(); weekShift(0);
+      } else $('loginErr').textContent='密碼錯誤或連線失敗';
     });
   }
   function logout(){sessionStorage.removeItem('gx_key');location.reload();}
-  function clearF(){document.getElementById('fEmp').value='';document.getElementById('fDate').value='';load();}
-
+  function clearF(){$('fEmp').value='';$('fDate').value='';load();}
   function fmtTime(iso){var d=new Date(iso);return d.toLocaleString('zh-TW',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false});}
 
+  // ===== 打卡查詢 =====
   function load(cb){
-    if(API_BASE.indexOf('REPLACE_ME')>=0){if(cb)cb(false);alert('後端尚未設定，請先填 API_BASE');return;}
-    var emp=document.getElementById('fEmp')?document.getElementById('fEmp').value:'';
-    var date=document.getElementById('fDate')?document.getElementById('fDate').value:'';
-    var u=API_BASE+'/api/punches?key='+encodeURIComponent(KEY);
+    var emp=$('fEmp')?$('fEmp').value:'', date=$('fDate')?$('fDate').value:'';
+    var u=API_BASE+'/api/punches'+k();
     if(emp)u+='&emp='+encodeURIComponent(emp);
     if(date)u+='&date='+encodeURIComponent(date);
     fetch(u).then(function(r){return r.json();}).then(function(d){
       if(!d.ok){if(cb)cb(false);return;}
-      rows=d.rows||[];
-      render();
-      if(cb)cb(true);
+      rows=d.rows||[]; render(); if(cb)cb(true);
     }).catch(function(){if(cb)cb(false);});
   }
-
   function render(){
-    // 員工下拉（首次/每次以全部資料補齊）
-    var sel=document.getElementById('fEmp'); var have={}; for(var i=1;i<sel.options.length;i++)have[sel.options[i].value]=1;
-    rows.forEach(function(r){if(!have[r.emp]){have[r.emp]=1;var o=document.createElement('option');o.value=r.emp;o.textContent=r.emp;sel.appendChild(o);}});
-
-    document.getElementById('kTotal').textContent=rows.length;
-    document.getElementById('kIn').textContent=rows.filter(function(r){return r.type==='in';}).length;
-    document.getElementById('kOut').textContent=rows.filter(function(r){return r.type==='out';}).length;
-    var ppl={};rows.forEach(function(r){ppl[r.emp]=1;});
-    document.getElementById('kPpl').textContent=Object.keys(ppl).length;
-
-    var tb=document.getElementById('tbody');
-    document.getElementById('empty').style.display=rows.length?'none':'block';
+    var s=$('fEmp'); var have={}; for(var i=1;i<s.options.length;i++)have[s.options[i].value]=1;
+    rows.forEach(function(r){if(!have[r.emp]){have[r.emp]=1;var o=document.createElement('option');o.value=r.emp;o.textContent=r.emp;s.appendChild(o);}});
+    $('kTotal').textContent=rows.length;
+    $('kIn').textContent=rows.filter(function(r){return r.type==='in';}).length;
+    $('kOut').textContent=rows.filter(function(r){return r.type==='out';}).length;
+    var ppl={};rows.forEach(function(r){ppl[r.emp]=1;}); $('kPpl').textContent=Object.keys(ppl).length;
+    var tb=$('tbody'); $('empty').style.display=rows.length?'none':'block';
     tb.innerHTML=rows.map(function(r){
       var loc=(r.lat!=null)?'<a target="_blank" href="https://www.google.com/maps?q='+r.lat+','+r.lng+'">📍地圖</a>':'—';
+      var dev=(r.dev_m==null)?'—':(r.dev_m>300?'<span class="badge b-dev">偏離 '+r.dev_m+'m</span>':'<span class="badge b-ok2">案場內</span>');
+      var early=(r.type==='out'&&r.early==1)?'<span class="badge b-early">早退</span>':'—';
       return '<tr><td>'+fmtTime(r.punched_at)+'</td><td><b>'+r.emp+'</b></td>'+
         '<td><span class="badge '+(r.type==='in'?'b-in">上班':'b-out">下班')+'</span></td>'+
-        '<td><span class="sh-tag">'+(SH_LABEL[r.shift]||'—')+'</span></td>'+
-        '<td>'+(r.status?'<span class="badge st-'+r.status+'">'+(ST_LABEL[r.status]||'')+'</span>':'—')+'</td>'+
-        '<td>'+(r.acc!=null?'±'+r.acc+'m':'—')+'</td><td>'+loc+'</td></tr>';
+        '<td>'+(r.site_name||'—')+'</td><td>'+dev+'</td><td>'+early+'</td><td>'+loc+'</td></tr>';
     }).join('');
     drawMap();
   }
-
-  function initMap(){
-    if(map)return;
-    map=L.map('map').setView([25.078,121.435],12);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map);
-    drawMap();
-  }
-  function drawMap(){
-    if(!map)return;
-    markers.forEach(function(m){map.removeLayer(m);});markers=[];
-    var pts=[];
-    rows.forEach(function(r){
-      if(r.lat==null)return;
-      var m=L.marker([r.lat,r.lng]).addTo(map)
-        .bindPopup('<b>'+r.emp+'</b><br>'+(r.type==='in'?'上班':'下班')+'<br>'+fmtTime(r.punched_at)+'<br>±'+(r.acc||'?')+'m');
-      markers.push(m);pts.push([r.lat,r.lng]);
-    });
-    if(pts.length)map.fitBounds(pts,{padding:[40,40],maxZoom:16});
-  }
-
-  function permLabel(p){return p==='admin'?'管理層':(p==='manager'?'主管/行政':'員工');}
-  function seedRoster(){
-    if(!confirm('建立 / 重設員工名錄（18 人）？\n所有人密碼會設成 1234（已改過的也會被重設）。')) return;
-    fetch(API_BASE+'/api/admin/seed-roster?key='+encodeURIComponent(KEY),{method:'POST'})
-      .then(function(r){return r.json();})
-      .then(function(d){ alert(d.ok?d.message:('失敗：'+(d.error||''))); if(d.ok)loadUsers(); })
-      .catch(function(){alert('連線失敗');});
-  }
-  function loadUsers(){
-    fetch(API_BASE+'/api/admin/users?key='+encodeURIComponent(KEY))
-      .then(function(r){return r.json();})
-      .then(function(d){
-        if(!d.ok){alert(d.error||'讀取失敗');return;}
-        var tb=document.getElementById('ubody');
-        document.getElementById('uempty').style.display=d.rows.length?'none':'block';
-        tb.innerHTML=d.rows.map(function(u){
-          var sel='<select onchange="setPerm(\''+u.empno+'\',this.value)" style="padding:5px 8px;border:1px solid var(--line);border-radius:6px;font-family:inherit;font-size:13px;background:#fff">'+
-            '<option value="admin"'+(u.perm==='admin'?' selected':'')+'>管理層</option>'+
-            '<option value="manager"'+(u.perm==='manager'?' selected':'')+'>主管/行政</option>'+
-            '<option value="staff"'+((u.perm==='staff'||!u.perm)?' selected':'')+'>員工</option></select>';
-          return '<tr><td><b>'+u.empno+'</b></td><td>'+(u.name||'')+'</td><td>'+(u.role||'')+'</td><td>'+sel+'</td>'+
-            '<td><a style="cursor:pointer;color:var(--navy2);font-weight:700" onclick="resetPw(\''+u.empno+'\')">重設密碼</a></td></tr>';
-        }).join('');
-      }).catch(function(){alert('連線失敗');});
-  }
-  function setPerm(empno,perm){
-    fetch(API_BASE+'/api/admin/set-perm?key='+encodeURIComponent(KEY),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({empno:empno,perm:perm})})
-      .then(function(r){return r.json();})
-      .then(function(d){ if(!d.ok)alert('失敗：'+(d.error||'')); })
-      .catch(function(){alert('連線失敗');});
-  }
-  function resetPw(empno){
-    if(!confirm('把編號 '+empno+' 的密碼重設為 1234？')) return;
-    fetch(API_BASE+'/api/admin/reset-pw?key='+encodeURIComponent(KEY),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({empno:empno})})
-      .then(function(r){return r.json();})
-      .then(function(d){alert(d.ok?d.message:('失敗：'+(d.error||'')));})
-      .catch(function(){alert('連線失敗');});
-  }
+  function initMap(){ if(map)return; map=L.map('map').setView([25.078,121.435],12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map); drawMap(); }
+  function drawMap(){ if(!map)return; markers.forEach(function(m){map.removeLayer(m);});markers=[];var pts=[];
+    rows.forEach(function(r){ if(r.lat==null)return;
+      var m=L.marker([r.lat,r.lng]).addTo(map).bindPopup('<b>'+r.emp+'</b><br>'+(r.type==='in'?'上班':'下班')+'<br>'+(r.site_name||'')+'<br>'+fmtTime(r.punched_at));
+      markers.push(m);pts.push([r.lat,r.lng]); });
+    if(pts.length)map.fitBounds(pts,{padding:[40,40],maxZoom:16}); }
   function exportCSV(){
-    var head=['時間','員工','類別','緯度','經度','誤差m'];
-    var lines=[head.join(',')];
-    rows.forEach(function(r){
-      lines.push([fmtTime(r.punched_at),r.emp,(r.type==='in'?'上班':'下班'),r.lat,r.lng,r.acc].join(','));
-    });
+    var head=['時間','員工','類別','案場','偏離m','早退','緯度','經度'];var lines=[head.join(',')];
+    rows.forEach(function(r){lines.push([fmtTime(r.punched_at),r.emp,(r.type==='in'?'上班':'下班'),(r.site_name||''),(r.dev_m==null?'':r.dev_m),(r.type==='out'&&r.early==1?'早退':''),r.lat,r.lng].join(','));});
     var blob=new Blob(['﻿'+lines.join('\n')],{type:'text/csv;charset=utf-8'});
-    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='廣修打卡_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='廣修打卡_'+fmtDate(new Date())+'.csv';a.click();
   }
 
-  // 自動登入（同次瀏覽器）
-  (function(){var k=sessionStorage.getItem('gx_key');if(k){document.getElementById('key').value=k;login();}})();
+  // ===== 員工名錄 =====
+  function seedRoster(){ if(!confirm('建立 / 重設員工名錄（18 人）？\n所有人密碼會設成 1234。'))return;
+    fetch(API_BASE+'/api/admin/seed-roster'+k(),{method:'POST'}).then(function(r){return r.json();})
+    .then(function(d){alert(d.ok?d.message:('失敗：'+(d.error||'')));if(d.ok)loadUsers();}).catch(function(){alert('連線失敗');});}
+  function permLabel(p){return p==='admin'?'管理層':(p==='manager'?'主管/行政':'員工');}
+  function loadUsers(){
+    fetch(API_BASE+'/api/admin/users'+k()).then(function(r){return r.json();}).then(function(d){
+      if(!d.ok){alert(d.error||'讀取失敗');return;}
+      USERS=d.rows||[]; var tb=$('ubody'); $('uempty').style.display=USERS.length?'none':'block';
+      tb.innerHTML=USERS.map(function(u){
+        var s='<select onchange="setPerm(\''+u.empno+'\',this.value)" style="padding:5px 8px;border:1px solid var(--line);border-radius:6px;font-size:13px">'+
+          '<option value="admin"'+(u.perm==='admin'?' selected':'')+'>管理層</option><option value="manager"'+(u.perm==='manager'?' selected':'')+'>主管/行政</option><option value="staff"'+((u.perm==='staff'||!u.perm)?' selected':'')+'>員工</option></select>';
+        return '<tr><td><b>'+u.empno+'</b></td><td>'+(u.name||'')+'</td><td>'+(u.role||'')+'</td><td>'+s+'</td><td><a style="cursor:pointer" onclick="resetPw(\''+u.empno+'\')">重設密碼</a></td></tr>';
+      }).join('');
+      renderGrid();
+    }).catch(function(){alert('連線失敗');});
+  }
+  function setPerm(e,p){fetch(API_BASE+'/api/admin/set-perm'+k(),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({empno:e,perm:p})}).then(function(r){return r.json();}).then(function(d){if(!d.ok)alert('失敗：'+(d.error||''));}).catch(function(){alert('連線失敗');});}
+  function resetPw(e){if(!confirm('把編號 '+e+' 的密碼重設為 1234？'))return;fetch(API_BASE+'/api/admin/reset-pw'+k(),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({empno:e})}).then(function(r){return r.json();}).then(function(d){alert(d.ok?d.message:('失敗：'+(d.error||'')));}).catch(function(){alert('連線失敗');});}
+
+  // ===== 案場管理 =====
+  function loadSites(){
+    fetch(API_BASE+'/api/sites/list'+k(),{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}).then(function(r){return r.json();}).then(function(d){
+      if(!d.ok)return; SITES=d.rows||[]; renderSites(); renderGrid();
+    }).catch(function(){});
+  }
+  function renderSites(){
+    var tb=$('sbody'); $('sempty').style.display=SITES.length?'none':'block';
+    tb.innerHTML=SITES.map(function(s){
+      var ll=(s.lat!=null)?(s.lat.toFixed(4)+','+s.lng.toFixed(4)):'—';
+      var st=s.status==='done'?'<span class="pill2 p-done">完工</span>':'<span class="pill2 p-active">進行中</span>';
+      var toggle=s.status==='done'?'復工':'標完工';
+      return '<tr><td><b>'+s.name+'</b></td><td>'+(s.address||'—')+'</td><td>'+ll+'</td><td>'+st+'</td>'+
+        '<td><a style="cursor:pointer" onclick=\'editSite('+s.id+')\'>編輯</a> ｜ <a style="cursor:pointer" onclick="toggleSite('+s.id+',\''+(s.status==='done'?'active':'done')+'\')">'+toggle+'</a></td></tr>';
+    }).join('');
+  }
+  function editSite(id){var s=SITES.filter(function(x){return x.id===id;})[0];if(!s)return;
+    $('siteId').value=s.id;$('siteName').value=s.name;$('siteAddr').value=s.address||'';
+    $('siteLatLng').value=(s.lat!=null)?(s.lat+','+s.lng):'';window.scrollTo(0,0);}
+  function clearSiteForm(){$('siteId').value='';$('siteName').value='';$('siteAddr').value='';$('siteLatLng').value='';}
+  function saveSite(){
+    var name=$('siteName').value.trim(); if(!name){alert('請輸入案場名稱');return;}
+    var lat=null,lng=null,ll=$('siteLatLng').value.trim();
+    if(ll){var m=ll.split(',');if(m.length===2){lat=parseFloat(m[0]);lng=parseFloat(m[1]);}}
+    var body={id:$('siteId').value||null,name:name,address:$('siteAddr').value.trim(),lat:lat,lng:lng,status:'active'};
+    fetch(API_BASE+'/api/sites/save'+k(),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+    .then(function(r){return r.json();}).then(function(d){if(d.ok){clearSiteForm();loadSites();}else alert('失敗：'+(d.error||''));}).catch(function(){alert('連線失敗');});
+  }
+  function toggleSite(id,status){var s=SITES.filter(function(x){return x.id===id;})[0];if(!s)return;
+    fetch(API_BASE+'/api/sites/save'+k(),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:id,name:s.name,address:s.address,lat:s.lat,lng:s.lng,status:status})})
+    .then(function(r){return r.json();}).then(function(d){if(d.ok)loadSites();else alert('失敗：'+(d.error||''));}).catch(function(){alert('連線失敗');});}
+
+  // ===== 班表 grid =====
+  function weekShift(delta){
+    if(delta===0){var t=new Date();t.setHours(0,0,0,0);weekStart=t;}
+    else{weekStart=new Date(weekStart);weekStart.setDate(weekStart.getDate()+delta);}
+    loadSchedule();
+  }
+  function weekDates(){var a=[];for(var i=0;i<7;i++){var d=new Date(weekStart);d.setDate(weekStart.getDate()+i);a.push(d);}return a;}
+  function loadSchedule(){
+    if(!weekStart)return;
+    var ds=weekDates();var from=fmtDate(ds[0]),to=fmtDate(ds[6]);
+    fetch(API_BASE+'/api/schedule/list'+k(),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({from:from,to:to})})
+    .then(function(r){return r.json();}).then(function(d){
+      SCHED={};(d.rows||[]).forEach(function(r){var key=r.empno+'|'+r.date;(SCHED[key]=SCHED[key]||[]).push(r);});
+      renderGrid();
+    }).catch(function(){});
+  }
+  function renderGrid(){
+    if(!weekStart||!USERS.length){return;}
+    var ds=weekDates();
+    $('ghead').innerHTML='<tr><th class="name">員工</th>'+ds.map(function(d){return '<th>'+(d.getMonth()+1)+'/'+d.getDate()+'<br>('+WD[d.getDay()]+')</th>';}).join('')+'</tr>';
+    $('gbody').innerHTML=USERS.map(function(u){
+      return '<tr><td class="name">'+u.empno+' '+(u.name||'')+'</td>'+ds.map(function(d){
+        var key=u.empno+'|'+fmtDate(d);var items=(SCHED[key]||[]).sort(function(a,b){return a.seq-b.seq;});
+        var html='<span class="cell empty2">＋</span>';
+        if(items.length){
+          if(items.some(function(x){return x.kind==='off';})) html='<span class="cell off2">休假</span>';
+          else html='<span class="cell"><span class="s">'+items.filter(function(x){return x.kind==='site';}).map(function(x){return x.site_name||('#'+x.site_id);}).join('<br>')+'</span></span>';
+        }
+        return '<td onclick="openCell(\''+u.empno+'\',\''+fmtDate(d)+'\')">'+html+'</td>';
+      }).join('')+'</tr>';
+    }).join('');
+  }
+  function openCell(empno,date){
+    curEmp=empno;curDate=date;sel=[];
+    var key=empno+'|'+date;var items=(SCHED[key]||[]).sort(function(a,b){return a.seq-b.seq;});
+    items.forEach(function(x){ if(x.kind==='off')sel=[{kind:'off'}]; else if(x.kind==='site')sel.push({kind:'site',site_id:x.site_id,name:x.site_name||('#'+x.site_id)}); });
+    var u=USERS.filter(function(x){return x.empno===empno;})[0];
+    $('mTitle').textContent='排班 · '+empno+' '+(u?u.name:'');
+    $('mSub').textContent=date;
+    $('mSites').innerHTML=SITES.filter(function(s){return s.status!=='done';}).map(function(s){return '<button class="sitebtn" onclick="addSite('+s.id+',\''+(s.name.replace(/'/g,""))+'\')">'+s.name+'</button>';}).join('')||'<div class="empty">尚無進行中案場</div>';
+    renderSel(); $('ov').classList.add('show');
+  }
+  function renderSel(){
+    $('mSel').innerHTML = sel.length? sel.map(function(x,i){return '<span class="chip">'+(x.kind==='off'?'休假':(i+1)+'. '+x.name)+'</span>';}).join('') : '<span style="color:var(--muted);font-size:13px">點下方案場加入，或標休假</span>';
+  }
+  function addSite(id,name){ if(sel.some(function(x){return x.kind==='off';}))sel=[]; if(sel.some(function(x){return x.site_id===id;}))return; sel.push({kind:'site',site_id:id,name:name});renderSel();}
+  function pickOff(){sel=[{kind:'off'}];renderSel();}
+  function clearSel(){sel=[];renderSel();}
+  function closeOv(){$('ov').classList.remove('show');}
+  function saveCell(){
+    var items=sel.map(function(x){return x.kind==='off'?{kind:'off'}:{kind:'site',site_id:x.site_id};});
+    fetch(API_BASE+'/api/schedule/set'+k(),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({target:curEmp,date:curDate,items:items})})
+    .then(function(r){return r.json();}).then(function(d){if(d.ok){closeOv();loadSchedule();}else alert('失敗：'+(d.error||''));}).catch(function(){alert('連線失敗');});
+  }
+
+  (function(){var v=sessionStorage.getItem('gx_key');if(v){$('key').value=v;login();}})();
 </script>
 </body>
 </html>

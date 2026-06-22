@@ -17,10 +17,9 @@
   .box{max-width:520px;margin:0 auto;padding:16px}
   .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
   label{font-size:13px;font-weight:700;color:var(--muted);display:block;margin-bottom:6px}
-  input{width:100%;padding:13px;border:1px solid var(--line);border-radius:9px;font-size:16px;font-family:inherit;margin-bottom:12px}
+  input,select{width:100%;padding:13px;border:1px solid var(--line);border-radius:9px;font-size:16px;font-family:inherit;margin-bottom:12px;background:#fff}
   .pbtn{width:100%;padding:14px;border:0;border-radius:10px;background:var(--navy);color:#fff;font-weight:800;font-size:16px;cursor:pointer;font-family:inherit}
   .err{color:var(--bad);font-size:13.5px;min-height:18px;margin-bottom:6px}
-
   .status{text-align:center;padding:6px 0 2px}
   .ring{width:118px;height:118px;border-radius:50%;margin:6px auto 12px;display:grid;place-items:center;border:7px solid var(--line);transition:.3s}
   .ring.ok{border-color:var(--ok)} .ring.bad{border-color:var(--bad)} .ring.wait{border-color:var(--warn)}
@@ -35,23 +34,23 @@
   .bin{background:var(--ok)} .bout{background:var(--navy)}
   .btns button:disabled{opacity:.45}
   .me{text-align:center;font-size:15px;font-weight:800;color:var(--navy);margin-bottom:2px}
+  .siteLabel{font-size:13px;font-weight:700;color:var(--muted);margin:6px 0 6px}
   h4{font-size:14px;font-weight:800;color:var(--navy);margin-bottom:10px}
-  .rec{padding:11px 0;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+  .rec{padding:11px 0;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .rec:last-child{border-bottom:0}.rec .t{font-weight:800;width:50px}.rec .ty{font-weight:700}
   .rec .ty.in{color:var(--ok)} .rec .ty.out{color:var(--navy2)}
+  .rec .sn{color:var(--muted);font-size:13px}
   .rec a{margin-left:auto;font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:16px;border:1px solid var(--line);color:var(--navy2);background:#f6f9fb}
   .empty{color:var(--muted);font-size:13.5px;text-align:center;padding:8px}
-  .srow{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+  .srow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
   .srow:last-child{border-bottom:0}
-  .srow .sd{font-weight:800;width:74px}.srow .sw{color:var(--muted);font-size:12.5px;width:34px}
-  .sbadge{margin-left:auto;font-weight:800;font-size:13px;padding:4px 12px;border-radius:16px}
-  .sb-M{background:#fde68a;color:#92520a}.sb-E{background:#bfdbfe;color:#1e40af}.sb-D{background:#bbf7d0;color:#166534}.sb-O{background:#e5e7eb;color:#374151}.sb-L{background:#fecaca;color:#991b1b}
-  .today-shift{text-align:center;font-size:14px;font-weight:800;margin-bottom:10px;padding:8px;border-radius:9px;background:#f0f4f8;color:var(--navy)}
-  .today-shift.off{background:#fff7ef;color:#8a5a2b}
-  .rec .st{font-size:12px;font-weight:800;padding:2px 8px;border-radius:12px;margin-left:8px}
-  .st-ontime{background:#dcfce7;color:#166534}.st-late{background:#fee2e2;color:#991b1b}.st-off{background:#fef3c7;color:#92520a}.st-noshift{background:#eef2f6;color:#647284}
+  .srow .sd{font-weight:800;width:52px}.srow .sw{color:var(--muted);font-size:12.5px;width:26px}
+  .srow .ss{font-size:13.5px}
+  .srow .off{color:#8a5a2b;font-weight:700}
+  .today{text-align:center;font-size:14px;font-weight:800;margin-bottom:10px;padding:8px;border-radius:9px;background:#f0f4f8;color:var(--navy)}
+  .today.off{background:#fff7ef;color:#8a5a2b}
   .note{background:#fff7ef;border:1px solid #f3d8bd;color:#8a5a2b;font-size:12.5px;border-radius:10px;padding:11px 13px;margin-bottom:14px}
-  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(80px);background:var(--navy);color:#fff;padding:13px 22px;border-radius:30px;font-weight:700;font-size:15px;opacity:0;transition:.3s;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(80px);background:var(--navy);color:#fff;padding:13px 20px;border-radius:24px;font-weight:700;font-size:14.5px;opacity:0;transition:.3s;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.3);max-width:90%;text-align:center}
   .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
   .hide{display:none}
 </style>
@@ -66,7 +65,7 @@
     <div id="loginView">
       <div class="note">請用你的員工編號登入。預設密碼 <b>1234</b>，登入後可自行修改。</div>
       <div class="card">
-        <label>員工編號（001～100）</label>
+        <label>員工編號</label>
         <input id="inNo" inputmode="numeric" placeholder="例如 007">
         <label>密碼</label>
         <input id="inPw" type="password" placeholder="預設 1234" onkeydown="if(event.key==='Enter')login()">
@@ -79,7 +78,11 @@
     <div id="punchView" class="hide">
       <div class="card">
         <div class="me" id="meTxt"></div>
-        <div id="todayShift" class="today-shift"></div>
+        <div id="today" class="today"></div>
+        <div id="siteWrap" class="hide">
+          <div class="siteLabel">打卡案場</div>
+          <select id="siteSel"></select>
+        </div>
         <div class="status">
           <div class="ring wait" id="ring"><b id="ringTxt">定位中…</b></div>
           <div class="loc" id="locTxt">正在取得您的位置…</div>
@@ -93,29 +96,29 @@
         </div>
       </div>
       <div class="card"><h4>📋 本次打卡</h4><div id="recs"><div class="empty">尚未打卡</div></div></div>
-      <div class="card"><h4>🗓 我的班表（近 14 天）</h4><div id="myShifts"><div class="empty">載入中…</div></div></div>
+      <div class="card"><h4>🗓 我的案場班表（近 14 天）</h4><div id="myShifts"><div class="empty">載入中…</div></div></div>
     </div>
   </div>
   <div class="toast" id="toast"></div>
 
 <script>
   var API_BASE = "https://guangxiu-punch.coating-wu.workers.dev";
-  var ME=null; // {empno,name,token}
-  var cur=null, session=[];
+  var ME=null, cur=null, session=[], todaySites=[];
 
   function $(id){return document.getElementById(id);}
   function mapUrl(la,ln){return "https://www.google.com/maps?q="+la+","+ln;}
   function setBtns(on){$('btnIn').disabled=!on;$('btnOut').disabled=!on;}
+  function pad(n){return (n<10?'0':'')+n;}
+  function fmtDate(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+  var WD=['日','一','二','三','四','五','六'];
 
   // ---- 登入 ----
   function login(){
     var no=$('inNo').value.trim(), pw=$('inPw').value;
     if(!no||!pw){$('loginErr').textContent='請輸入編號與密碼';return;}
     $('loginErr').textContent='登入中…';
-    fetch(API_BASE+'/api/login',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({empno:no,password:pw})})
-    .then(function(r){return r.json();})
-    .then(function(d){
+    fetch(API_BASE+'/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({empno:no,password:pw})})
+    .then(function(r){return r.json();}).then(function(d){
       if(d.ok){ ME={empno:d.empno,name:d.name,role:d.role,perm:d.perm,must_change:d.must_change,token:d.token};
         localStorage.setItem('gx_me',JSON.stringify(ME)); enterApp(); }
       else $('loginErr').textContent=d.error||'登入失敗';
@@ -129,37 +132,46 @@
     $('topR').style.display='flex';
     $('meTxt').textContent='編號 '+ME.empno+'　'+(ME.name||'')+(ME.role?'（'+ME.role+'）':'');
     locate();
-    loadMyShifts();
+    loadMySchedule();
     if(ME&&ME.must_change){setTimeout(function(){toast('首次登入，請先修改密碼');changePw();},500);}
   }
 
-  // ---- 我的班表 ----
-  var SH_LABEL={M:'早班',E:'晚班',D:'全天',O:'休假',L:'請假'};
-  var ST_LABEL={ontime:'正常',late:'遲到',off:'休假打卡',noshift:'未排班'};
-  var SH_WD=['日','一','二','三','四','五','六'];
-  function shPad(n){return (n<10?'0':'')+n;}
-  function shFmt(d){return d.getFullYear()+'-'+shPad(d.getMonth()+1)+'-'+shPad(d.getDate());}
-  function loadMyShifts(){
+  // ---- 我的班表（案場）----
+  function loadMySchedule(){
     if(!ME) return;
     var t=new Date();t.setHours(0,0,0,0);
     var end=new Date(t);end.setDate(t.getDate()+13);
-    fetch(API_BASE+'/api/shifts/list',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({empno:ME.empno,token:ME.token,from:shFmt(t),to:shFmt(end)})})
+    fetch(API_BASE+'/api/schedule/list',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({empno:ME.empno,token:ME.token,from:fmtDate(t),to:fmtDate(end)})})
     .then(function(r){return r.json();}).then(function(d){
-      // 今日班別橫幅
-      var todayStr=shFmt(new Date());
-      var tShift=''; (d.rows||[]).forEach(function(r){if(r.date===todayStr)tShift=r.shift;});
-      var tb=$('todayShift');
-      if(tShift==='O'||tShift==='L'){tb.className='today-shift off';tb.textContent='今天：'+SH_LABEL[tShift]+'（休息日）';}
-      else if(tShift){tb.className='today-shift';tb.textContent='今天班別：'+SH_LABEL[tShift];}
-      else {tb.className='today-shift off';tb.textContent='今天未排班';}
+      var mine=(d.rows||[]).filter(function(r){return r.empno===ME.empno;});
+      var todayStr=fmtDate(new Date());
+      // 今日：收集案場 / 休假
+      todaySites=[]; var todayOff=false;
+      mine.forEach(function(r){ if(r.date===todayStr){ if(r.kind==='off')todayOff=true; else if(r.kind==='site')todaySites.push({id:r.site_id,name:r.site_name||('案場#'+r.site_id)}); } });
+      todaySites.sort(function(a,b){return 0;});
+      var tb=$('today'), sw=$('siteWrap'), sel=$('siteSel');
+      if(todayOff){ tb.className='today off'; tb.textContent='今天：休假'; sw.classList.add('hide'); }
+      else if(todaySites.length){
+        tb.className='today'; tb.textContent='今天案場：'+todaySites.map(function(s){return s.name;}).join('、');
+        sw.classList.remove('hide');
+        sel.innerHTML=todaySites.map(function(s){return '<option value="'+s.id+'">'+s.name+'</option>';}).join('');
+      } else {
+        tb.className='today off'; tb.textContent='今天未排案場（仍可打卡，但不綁案場）';
+        sw.classList.add('hide'); sel.innerHTML='';
+      }
+      // 近14天列表
       var el=$('myShifts');
-      var rows=(d.rows||[]).filter(function(r){return r.shift;}).sort(function(a,b){return a.date<b.date?-1:1;});
-      if(!rows.length){el.innerHTML='<div class="empty">近 14 天尚未排班</div>';return;}
-      el.innerHTML=rows.map(function(r){
-        var p=r.date.split('-');var dt=new Date(+p[0],+p[1]-1,+p[2]);
-        return '<div class="srow"><span class="sd">'+(+p[1])+'/'+(+p[2])+'</span><span class="sw">('+SH_WD[dt.getDay()]+')</span>'+
-          '<span class="sbadge sb-'+r.shift+'">'+(SH_LABEL[r.shift]||r.shift)+'</span></div>';
+      var byDate={};
+      mine.forEach(function(r){ (byDate[r.date]=byDate[r.date]||[]).push(r); });
+      var dates=Object.keys(byDate).sort();
+      if(!dates.length){el.innerHTML='<div class="empty">近 14 天尚未排班</div>';return;}
+      el.innerHTML=dates.map(function(ds){
+        var p=ds.split('-');var dt=new Date(+p[0],+p[1]-1,+p[2]);
+        var items=byDate[ds].sort(function(a,b){return a.seq-b.seq;});
+        var off=items.some(function(x){return x.kind==='off';});
+        var txt=off?'<span class="off">休假</span>':items.filter(function(x){return x.kind==='site';}).map(function(x){return x.site_name||('案場#'+x.site_id);}).join(' → ');
+        return '<div class="srow"><span class="sd">'+(+p[1])+'/'+(+p[2])+'</span><span class="sw">('+WD[dt.getDay()]+')</span><span class="ss">'+txt+'</span></div>';
       }).join('');
     }).catch(function(){$('myShifts').innerHTML='<div class="empty">班表載入失敗</div>';});
   }
@@ -168,12 +180,10 @@
     var np=prompt('輸入新密碼（至少 4 碼）');
     if(np===null) return;
     if(np.length<4){toast('密碼至少 4 碼');return;}
-    var np2=prompt('再輸入一次新密碼');
-    if(np2!==np){toast('兩次密碼不一致');return;}
+    if(prompt('再輸入一次新密碼')!==np){toast('兩次密碼不一致');return;}
     fetch(API_BASE+'/api/change-password',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({empno:ME.empno,token:ME.token,newPassword:np})})
-    .then(function(r){return r.json();})
-    .then(function(d){
+    .then(function(r){return r.json();}).then(function(d){
       if(d.ok){ ME.token=d.token; ME.must_change=0; localStorage.setItem('gx_me',JSON.stringify(ME)); toast('密碼已更新'); }
       else toast(d.error||'更新失敗');
     }).catch(function(){toast('連線失敗');});
@@ -201,19 +211,20 @@
   // ---- 打卡 ----
   function punch(type){
     if(!cur){toast('尚未取得定位，請按重新定位');return;}
+    var site_id = (todaySites.length && !$('siteWrap').classList.contains('hide')) ? $('siteSel').value : null;
     setBtns(false);
     fetch(API_BASE+'/api/punch',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({empno:ME.empno,token:ME.token,type:type,lat:cur.lat,lng:cur.lng,acc:Math.round(cur.acc)})})
-    .then(function(r){return r.json();})
-    .then(function(d){
+      body:JSON.stringify({empno:ME.empno,token:ME.token,type:type,lat:cur.lat,lng:cur.lng,acc:Math.round(cur.acc),site_id:site_id})})
+    .then(function(r){return r.json();}).then(function(d){
       setBtns(true);
       if(d.ok){
         var now=new Date();
-        var st=(d.status&&ST_LABEL[d.status])?d.status:'';
-        session.unshift({type:type,time:now.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',hour12:false}),lat:cur.lat,lng:cur.lng,status:st});
+        session.unshift({type:type,time:now.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',hour12:false}),lat:cur.lat,lng:cur.lng,site_name:d.site_name||''});
         renderRecs();
         var msg=(type==='in'?'上班':'下班')+'打卡成功';
-        if(st) msg+='・'+ST_LABEL[st];
+        if(d.site_name) msg+='・'+d.site_name;
+        if(d.dev_m!=null && d.dev_m>300) msg+='（距案場約'+d.dev_m+'m）';
+        if(type==='out' && d.early) msg+='（早於下班時間）';
         toast(msg);
       } else if(d.error&&d.error.indexOf('登入')>=0){ toast('登入失效，請重新登入'); setTimeout(logout,1200); }
       else toast('打卡失敗：'+(d.error||''));
@@ -224,14 +235,13 @@
     if(!session.length){el.innerHTML='<div class="empty">尚未打卡</div>';return;}
     el.innerHTML=session.map(function(r){
       return '<div class="rec"><span class="t">'+r.time+'</span><span class="ty '+r.type+'">'+(r.type==='in'?'上班':'下班')+'</span>'+
-        (r.status?'<span class="st st-'+r.status+'">'+(ST_LABEL[r.status]||'')+'</span>':'')+
+        (r.site_name?'<span class="sn">'+r.site_name+'</span>':'')+
         '<a target="_blank" href="'+mapUrl(r.lat,r.lng)+'">📍地圖</a></div>';
     }).join('');
   }
 
-  var tT;function toast(m){var t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(tT);tT=setTimeout(function(){t.classList.remove('show');},2400);}
+  var tT;function toast(m){var t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(tT);tT=setTimeout(function(){t.classList.remove('show');},2600);}
 
-  // 自動登入（這支手機記住）
   (function(){var s=localStorage.getItem('gx_me');if(s){try{ME=JSON.parse(s);enterApp();}catch(e){}}})();
 </script>
 </body>
