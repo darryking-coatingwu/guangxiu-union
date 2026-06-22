@@ -41,6 +41,11 @@
   .rec .ty.in{color:var(--ok)} .rec .ty.out{color:var(--navy2)}
   .rec a{margin-left:auto;font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:16px;border:1px solid var(--line);color:var(--navy2);background:#f6f9fb}
   .empty{color:var(--muted);font-size:13.5px;text-align:center;padding:8px}
+  .srow{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+  .srow:last-child{border-bottom:0}
+  .srow .sd{font-weight:800;width:74px}.srow .sw{color:var(--muted);font-size:12.5px;width:34px}
+  .sbadge{margin-left:auto;font-weight:800;font-size:13px;padding:4px 12px;border-radius:16px}
+  .sb-M{background:#fde68a;color:#92520a}.sb-E{background:#bfdbfe;color:#1e40af}.sb-D{background:#bbf7d0;color:#166534}.sb-O{background:#e5e7eb;color:#374151}.sb-L{background:#fecaca;color:#991b1b}
   .note{background:#fff7ef;border:1px solid #f3d8bd;color:#8a5a2b;font-size:12.5px;border-radius:10px;padding:11px 13px;margin-bottom:14px}
   .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(80px);background:var(--navy);color:#fff;padding:13px 22px;border-radius:30px;font-weight:700;font-size:15px;opacity:0;transition:.3s;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.3)}
   .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
@@ -83,6 +88,7 @@
         </div>
       </div>
       <div class="card"><h4>📋 本次打卡</h4><div id="recs"><div class="empty">尚未打卡</div></div></div>
+      <div class="card"><h4>🗓 我的班表（近 14 天）</h4><div id="myShifts"><div class="empty">載入中…</div></div></div>
     </div>
   </div>
   <div class="toast" id="toast"></div>
@@ -118,7 +124,31 @@
     $('topR').style.display='flex';
     $('meTxt').textContent='編號 '+ME.empno+'　'+(ME.name||'')+(ME.role?'（'+ME.role+'）':'');
     locate();
+    loadMyShifts();
     if(ME&&ME.must_change){setTimeout(function(){toast('首次登入，請先修改密碼');changePw();},500);}
+  }
+
+  // ---- 我的班表 ----
+  var SH_LABEL={M:'早班',E:'晚班',D:'全天',O:'休假',L:'請假'};
+  var SH_WD=['日','一','二','三','四','五','六'];
+  function shPad(n){return (n<10?'0':'')+n;}
+  function shFmt(d){return d.getFullYear()+'-'+shPad(d.getMonth()+1)+'-'+shPad(d.getDate());}
+  function loadMyShifts(){
+    if(!ME) return;
+    var t=new Date();t.setHours(0,0,0,0);
+    var end=new Date(t);end.setDate(t.getDate()+13);
+    fetch(API_BASE+'/api/shifts/list',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({empno:ME.empno,token:ME.token,from:shFmt(t),to:shFmt(end)})})
+    .then(function(r){return r.json();}).then(function(d){
+      var el=$('myShifts');
+      var rows=(d.rows||[]).filter(function(r){return r.shift;}).sort(function(a,b){return a.date<b.date?-1:1;});
+      if(!rows.length){el.innerHTML='<div class="empty">近 14 天尚未排班</div>';return;}
+      el.innerHTML=rows.map(function(r){
+        var p=r.date.split('-');var dt=new Date(+p[0],+p[1]-1,+p[2]);
+        return '<div class="srow"><span class="sd">'+(+p[1])+'/'+(+p[2])+'</span><span class="sw">('+SH_WD[dt.getDay()]+')</span>'+
+          '<span class="sbadge sb-'+r.shift+'">'+(SH_LABEL[r.shift]||r.shift)+'</span></div>';
+      }).join('');
+    }).catch(function(){$('myShifts').innerHTML='<div class="empty">班表載入失敗</div>';});
   }
 
   function changePw(){

@@ -215,6 +215,25 @@
   .ea-err{color:var(--accent);font-size:13px;min-height:18px;margin-bottom:4px;font-weight:700}
   .ea-cancel{display:block;text-align:center;color:var(--muted);font-size:13px;font-weight:700;margin-top:14px;cursor:pointer}
   .ea-cancel:hover{color:var(--navy)}
+
+  /* ===== 排班表 ===== */
+  .shift-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .shift-bar b{font-size:15px;color:var(--navy);min-width:180px}
+  .sbtn{border:1px solid var(--line);background:#fff;color:var(--navy);font-weight:700;font-size:13px;padding:7px 12px;border-radius:8px;cursor:pointer;font-family:inherit}
+  .sbtn:hover{background:#f1f5f9}
+  .shift-msg{font-size:13px;color:var(--accent);font-weight:700}
+  .shift-legend{font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:2}
+  .shift-legend .lg{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:5px;font-size:12px;font-weight:800;margin:0 3px 0 10px;vertical-align:middle}
+  .lg-M{background:#fde68a;color:#92520a}.lg-E{background:#bfdbfe;color:#1e40af}.lg-D{background:#bbf7d0;color:#166534}.lg-O{background:#e5e7eb;color:#374151}.lg-L{background:#fecaca;color:#991b1b}
+  .shift-tbl{border-collapse:collapse;width:100%;min-width:680px;font-size:13px}
+  .shift-tbl th,.shift-tbl td{border:1px solid var(--line);padding:6px;text-align:center}
+  .shift-tbl thead th{background:#f1f5f9;color:var(--navy);font-weight:800;padding:8px 6px}
+  .shift-tbl thead th.wknd{background:#fde9d9}
+  .shift-tbl td.emp{text-align:left;white-space:nowrap;font-weight:700;color:var(--navy);background:#fafcfe;position:sticky;left:0}
+  .shift-tbl td.emp small{display:block;font-weight:600;color:var(--muted);font-size:11px}
+  .shcell{width:54px;border:0;border-radius:6px;padding:5px 2px;font-size:13px;font-weight:800;text-align:center;font-family:inherit;cursor:pointer;background:#fff;color:#9aa6b2}
+  .shcell:disabled{cursor:default;-webkit-appearance:none;appearance:none;text-align:center}
+  .shcell.v-M{background:#fde68a;color:#92520a}.shcell.v-E{background:#bfdbfe;color:#1e40af}.shcell.v-D{background:#bbf7d0;color:#166534}.shcell.v-O{background:#e5e7eb;color:#374151}.shcell.v-L{background:#fecaca;color:#991b1b}
 </style>
 </head>
 <body>
@@ -451,6 +470,7 @@
       <a data-v="po" onclick="erpNav('po')"><span class="e">🧾</span>採購請購</a>
       <div class="grp">人事</div>
       <a data-v="hr" onclick="erpNav('hr')"><span class="e">👷</span>出勤 · 簽核</a>
+      <a data-v="shift" onclick="erpNav('shift')"><span class="e">🗓</span>排班表</a>
       <div class="grp">分析</div>
       <a data-v="rep" onclick="erpNav('rep')"><span class="e">📊</span>報表中心</a>
     </div>
@@ -570,6 +590,28 @@
         </div>
       </div>
 
+      <div class="erp-view" id="v-shift">
+        <div class="crumb">人事 / 排班表</div>
+        <div class="ptitle">排班表</div>
+        <div class="panel">
+          <div class="shift-bar">
+            <button class="sbtn" onclick="shiftWeek(-1)">◀ 上一週</button>
+            <b id="shiftRange">—</b>
+            <button class="sbtn" onclick="shiftWeek(1)">下一週 ▶</button>
+            <button class="sbtn" onclick="shiftWeek(0)">本週</button>
+            <span id="shiftMsg" class="shift-msg"></span>
+          </div>
+          <div class="shift-legend">
+            班別：<span class="lg lg-M">早</span>早班
+            <span class="lg lg-E">晚</span>晚班
+            <span class="lg lg-D">全</span>全天
+            <span class="lg lg-O">休</span>休假
+            <span class="lg lg-L">假</span>請假　·　<span id="shiftHint">直接點格子下拉選，馬上儲存</span>
+          </div>
+          <div style="overflow-x:auto"><table class="shift-tbl" id="shiftTbl"></table></div>
+        </div>
+      </div>
+
       <div class="erp-view" id="v-rep">
         <div class="crumb">分析 / 報表中心</div>
         <div class="ptitle">報表中心</div>
@@ -663,6 +705,79 @@
   function eaEnter(){eaClose();openErp();}
   function eaLogout(){localStorage.removeItem('gx_me');GX_ME=null;closeErp();}
 
+  // ===== 排班表 =====
+  var SH_ROSTER=[
+    ['001','陳建修','董事長'],['002','陳敬廉','總經理'],['003','陳冠男','副總經理'],
+    ['004','陳軍廷','工務經理'],['005','康竣凱','工務經理'],['006','蕭尉勳','特助'],['007','楊茜媛','會計'],
+    ['008','林榮','工地領班'],['009','羅忠陽','工地領班'],
+    ['010','陳凱強','技工'],['011','羅忠順','技工'],['012','蘇慶昌','技工'],['013','呂忠義','技工'],
+    ['014','胡定','移工'],['015','德偉','移工'],['016','阿南','移工'],['017','EKO','移工'],['018','阿NO','移工']
+  ];
+  var SH_OPTS=[['',''],['M','早'],['E','晚'],['D','全'],['O','休'],['L','假']];
+  var SH_WD=['日','一','二','三','四','五','六'];
+  var shBase=null, shInited=false;
+  function shPad(n){return (n<10?'0':'')+n;}
+  function shFmt(d){return d.getFullYear()+'-'+shPad(d.getMonth()+1)+'-'+shPad(d.getDate());}
+  function shMonday(d){var x=new Date(d);x.setHours(0,0,0,0);var g=x.getDay();x.setDate(x.getDate()+(g===0?-6:1-g));return x;}
+  function initShift(){
+    if(!shBase) shBase=shMonday(new Date());
+    renderShift();
+  }
+  function shiftWeek(delta){
+    if(!shBase||delta===0) shBase=shMonday(new Date());
+    else shBase.setDate(shBase.getDate()+7*delta);
+    renderShift();
+  }
+  function renderShift(){
+    var canEdit = GX_ME && (GX_ME.perm==='admin'||GX_ME.perm==='manager');
+    var days=[]; for(var i=0;i<7;i++){var d=new Date(shBase);d.setDate(shBase.getDate()+i);days.push(d);}
+    document.getElementById('shiftRange').textContent=shFmt(days[0])+' ～ '+shFmt(days[6]);
+    document.getElementById('shiftHint').textContent = canEdit ? '直接點格子下拉選，馬上儲存' : '你的權限為唯讀，僅管理層／主管可排班';
+    var todayStr=shFmt(new Date());
+    var h='<thead><tr><th class="emp" style="text-align:left">員工</th>';
+    days.forEach(function(d){var wd=d.getDay();var wk=(wd===0||wd===6);h+='<th class="'+(wk?'wknd':'')+'">'+(d.getMonth()+1)+'/'+d.getDate()+'<br><small>('+SH_WD[wd]+')</small></th>';});
+    h+='</tr></thead><tbody>';
+    SH_ROSTER.forEach(function(p){
+      h+='<tr><td class="emp">'+p[1]+'<small>'+p[0]+'・'+p[2]+'</small></td>';
+      days.forEach(function(d){
+        var ds=shFmt(d);
+        var opts=SH_OPTS.map(function(o){return '<option value="'+o[0]+'">'+(o[1]||'—')+'</option>';}).join('');
+        h+='<td><select class="shcell" data-emp="'+p[0]+'" data-date="'+ds+'" '+(canEdit?'onchange="setShift(this)"':'disabled')+'>'+opts+'</select></td>';
+      });
+      h+='</tr>';
+    });
+    h+='</tbody>';
+    document.getElementById('shiftTbl').innerHTML=h;
+    loadShiftData(shFmt(days[0]),shFmt(days[6]));
+  }
+  function shColor(sel){
+    sel.className='shcell'+(sel.value?(' v-'+sel.value):'');
+  }
+  function loadShiftData(from,to){
+    if(!GX_ME){return;}
+    document.getElementById('shiftMsg').textContent='載入中…';
+    fetch(GX_API+'/api/shifts/list',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({empno:GX_ME.empno,token:GX_ME.token,from:from,to:to})})
+    .then(function(r){return r.json();}).then(function(d){
+      document.getElementById('shiftMsg').textContent='';
+      var map={}; (d.rows||[]).forEach(function(r){map[r.empno+'|'+r.date]=r.shift;});
+      var cells=document.querySelectorAll('#shiftTbl .shcell');
+      cells.forEach(function(sel){var v=map[sel.dataset.emp+'|'+sel.dataset.date]||'';sel.value=v;shColor(sel);});
+    }).catch(function(){document.getElementById('shiftMsg').textContent='載入失敗';});
+  }
+  function setShift(sel){
+    shColor(sel);
+    var prev=sel.dataset.prev||'';
+    document.getElementById('shiftMsg').textContent='儲存中…';
+    fetch(GX_API+'/api/shifts/set',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({empno:GX_ME.empno,token:GX_ME.token,target:sel.dataset.emp,date:sel.dataset.date,shift:sel.value})})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d.ok){document.getElementById('shiftMsg').textContent='已儲存 ✓';sel.dataset.prev=sel.value;
+        setTimeout(function(){var m=document.getElementById('shiftMsg');if(m.textContent==='已儲存 ✓')m.textContent='';},1500);}
+      else {document.getElementById('shiftMsg').textContent=d.error||'儲存失敗';sel.value=prev;shColor(sel);}
+    }).catch(function(){document.getElementById('shiftMsg').textContent='連線失敗';sel.value=prev;shColor(sel);});
+  }
+
   function openErp(){document.getElementById('pnav').classList.remove('open');document.getElementById('site').classList.add('hide');document.getElementById('erp').classList.add('show');closeSide();window.scrollTo(0,0);}
   function closeErp(){document.getElementById('erp').classList.remove('show');document.getElementById('site').classList.remove('hide');closeSide();window.scrollTo(0,0);}
   function toggleSide(){document.getElementById('side').classList.toggle('open');document.getElementById('sideOverlay').classList.toggle('open');}
@@ -673,6 +788,7 @@
     document.getElementById('v-'+v).classList.add('on');
     document.querySelector('.main').scrollTop=0;
     closeSide();
+    if(v==='shift') initShift();
   }
 </script>
 </body>
