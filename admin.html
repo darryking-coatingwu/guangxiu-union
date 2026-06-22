@@ -44,6 +44,8 @@
   .tw{overflow-x:auto}
   .badge{font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:16px}
   .b-in{background:#e4f5ec;color:var(--ok)} .b-out{background:#e7eef6;color:var(--navy2)}
+  .st-ontime{background:#dcfce7;color:#166534}.st-late{background:#fee2e2;color:#991b1b}.st-off{background:#fef3c7;color:#92520a}.st-noshift{background:#eef2f6;color:#647284}
+  .sh-tag{font-size:11.5px;font-weight:700}
   td a{color:var(--navy2);font-weight:700}
   .empty{color:var(--muted);text-align:center;padding:24px;font-size:14px}
   h4{font-size:15px;font-weight:800;color:var(--navy);margin-bottom:12px}
@@ -101,7 +103,7 @@
       <h4>📋 打卡明細</h4>
       <div class="tw">
         <table>
-          <thead><tr><th>時間</th><th>員工</th><th>類別</th><th>定位誤差</th><th>位置</th></tr></thead>
+          <thead><tr><th>時間</th><th>員工</th><th>類別</th><th>班別</th><th>狀態</th><th>定位誤差</th><th>位置</th></tr></thead>
           <tbody id="tbody"></tbody>
         </table>
       </div>
@@ -115,6 +117,8 @@
   var API_BASE = "https://guangxiu-punch.coating-wu.workers.dev";
 
   var KEY="", rows=[], map=null, markers=[];
+  var SH_LABEL={M:'早班',E:'晚班',D:'全天',O:'休假',L:'請假','':'—'};
+  var ST_LABEL={ontime:'正常',late:'遲到',off:'休假打卡',noshift:'未排班'};
 
   function login(){
     var k=document.getElementById('key').value.trim();
@@ -169,6 +173,8 @@
       var loc=(r.lat!=null)?'<a target="_blank" href="https://www.google.com/maps?q='+r.lat+','+r.lng+'">📍地圖</a>':'—';
       return '<tr><td>'+fmtTime(r.punched_at)+'</td><td><b>'+r.emp+'</b></td>'+
         '<td><span class="badge '+(r.type==='in'?'b-in">上班':'b-out">下班')+'</span></td>'+
+        '<td><span class="sh-tag">'+(SH_LABEL[r.shift]||'—')+'</span></td>'+
+        '<td>'+(r.status?'<span class="badge st-'+r.status+'">'+(ST_LABEL[r.status]||'')+'</span>':'—')+'</td>'+
         '<td>'+(r.acc!=null?'±'+r.acc+'m':'—')+'</td><td>'+loc+'</td></tr>';
     }).join('');
     drawMap();

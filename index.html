@@ -234,6 +234,9 @@
   .shcell{width:54px;border:0;border-radius:6px;padding:5px 2px;font-size:13px;font-weight:800;text-align:center;font-family:inherit;cursor:pointer;background:#fff;color:#9aa6b2}
   .shcell:disabled{cursor:default;-webkit-appearance:none;appearance:none;text-align:center}
   .shcell.v-M{background:#fde68a;color:#92520a}.shcell.v-E{background:#bfdbfe;color:#1e40af}.shcell.v-D{background:#bbf7d0;color:#166534}.shcell.v-O{background:#e5e7eb;color:#374151}.shcell.v-L{background:#fecaca;color:#991b1b}
+  .cfg-row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:14px}
+  .cfg-row label{font-size:14px;font-weight:700;color:var(--navy)}
+  .cfg-row input{width:140px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:15px;font-family:inherit}
 </style>
 </head>
 <body>
@@ -471,6 +474,7 @@
       <div class="grp">人事</div>
       <a data-v="hr" onclick="erpNav('hr')"><span class="e">👷</span>出勤 · 簽核</a>
       <a data-v="shift" onclick="erpNav('shift')"><span class="e">🗓</span>排班表</a>
+      <a data-v="shiftcfg" onclick="erpNav('shiftcfg')"><span class="e">⚙️</span>班別設定</a>
       <div class="grp">分析</div>
       <a data-v="rep" onclick="erpNav('rep')"><span class="e">📊</span>報表中心</a>
     </div>
@@ -612,6 +616,21 @@
         </div>
       </div>
 
+      <div class="erp-view" id="v-shiftcfg">
+        <div class="crumb">人事 / 班別設定</div>
+        <div class="ptitle">班別設定</div>
+        <div class="panel" style="max-width:460px">
+          <p style="font-size:13px;color:var(--muted);margin-bottom:16px">設定各班別的上班時間與遲到寬限，員工打卡時系統會依此自動判定「正常／遲到」。</p>
+          <div class="cfg-row"><label>早班　上班時間</label><input type="time" id="cfgM"></div>
+          <div class="cfg-row"><label>晚班　上班時間</label><input type="time" id="cfgE"></div>
+          <div class="cfg-row"><label>全天　上班時間</label><input type="time" id="cfgD"></div>
+          <div class="cfg-row"><label>遲到寬限（分鐘）</label><input type="number" id="cfgG" min="0" max="120" step="1"></div>
+          <button class="ea-btn" style="margin-top:8px" onclick="saveCfg()">儲存設定</button>
+          <div id="cfgMsg" style="margin-top:10px;font-size:13px;font-weight:700;min-height:18px"></div>
+          <p style="font-size:12px;color:var(--muted);margin-top:6px">休假、請假當天打卡會標記提醒；未排班當天打卡標記「未排」。</p>
+        </div>
+      </div>
+
       <div class="erp-view" id="v-rep">
         <div class="crumb">分析 / 報表中心</div>
         <div class="ptitle">報表中心</div>
@@ -705,9 +724,34 @@
   function eaEnter(){eaClose();openErp();}
   function eaLogout(){localStorage.removeItem('gx_me');GX_ME=null;closeErp();}
 
+  // ===== 班別設定 =====
+  function loadCfg(){
+    if(!GX_ME) return;
+    var canEdit=GX_ME.perm==='admin'||GX_ME.perm==='manager';
+    ['cfgM','cfgE','cfgD','cfgG'].forEach(function(id){$g(id).disabled=!canEdit;});
+    document.querySelector('#v-shiftcfg .ea-btn').style.display=canEdit?'block':'none';
+    fetch(GX_API+'/api/shift-config/get',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({empno:GX_ME.empno,token:GX_ME.token})})
+    .then(function(r){return r.json();}).then(function(d){
+      var c=d.config||{M:'08:00',E:'13:00',D:'08:00',grace:15};
+      $g('cfgM').value=c.M;$g('cfgE').value=c.E;$g('cfgD').value=c.D;$g('cfgG').value=c.grace;
+    }).catch(function(){$g('cfgMsg').textContent='載入失敗';});
+  }
+  function saveCfg(){
+    var cfg={M:$g('cfgM').value,E:$g('cfgE').value,D:$g('cfgD').value,grace:$g('cfgG').value};
+    if(!cfg.M||!cfg.E||!cfg.D){$g('cfgMsg').style.color='var(--accent)';$g('cfgMsg').textContent='請填完整上班時間';return;}
+    $g('cfgMsg').style.color='var(--muted)';$g('cfgMsg').textContent='儲存中…';
+    fetch(GX_API+'/api/shift-config/set',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({empno:GX_ME.empno,token:GX_ME.token,config:cfg})})
+    .then(function(r){return r.json();}).then(function(d){
+      if(d.ok){$g('cfgMsg').style.color='var(--ok)';$g('cfgMsg').textContent='已儲存 ✓';}
+      else {$g('cfgMsg').style.color='var(--accent)';$g('cfgMsg').textContent=d.error||'儲存失敗';}
+    }).catch(function(){$g('cfgMsg').style.color='var(--accent)';$g('cfgMsg').textContent='連線失敗';});
+  }
+
   // ===== 排班表 =====
   var SH_ROSTER=[
-    ['001','陳建修','董事長'],['002','陳敬廉','總經理'],['003','陳冠男','副總經理'],
+    ['002','陳敬廉','總經理'],['003','陳冠男','副總經理'],
     ['004','陳軍廷','工務經理'],['005','康竣凱','工務經理'],['006','蕭尉勳','特助'],['007','楊茜媛','會計'],
     ['008','林榮','工地領班'],['009','羅忠陽','工地領班'],
     ['010','陳凱強','技工'],['011','羅忠順','技工'],['012','蘇慶昌','技工'],['013','呂忠義','技工'],
@@ -789,6 +833,7 @@
     document.querySelector('.main').scrollTop=0;
     closeSide();
     if(v==='shift') initShift();
+    if(v==='shiftcfg') loadCfg();
   }
 </script>
 </body>
