@@ -474,7 +474,7 @@
       <div class="grp">人事</div>
       <a data-v="hr" onclick="erpNav('hr')"><span class="e">👷</span>出勤 · 簽核</a>
       <a data-v="shift" onclick="erpNav('shift')"><span class="e">🗓</span>排班表</a>
-      <a data-v="shiftcfg" onclick="erpNav('shiftcfg')"><span class="e">⚙️</span>班別設定</a>
+      <a data-v="shiftcfg" onclick="erpNav('shiftcfg')"><span class="e">🏗</span>案場管理</a>
       <div class="grp">分析</div>
       <a data-v="rep" onclick="erpNav('rep')"><span class="e">📊</span>報表中心</a>
     </div>
@@ -606,28 +606,28 @@
             <span id="shiftMsg" class="shift-msg"></span>
           </div>
           <div class="shift-legend">
-            班別：<span class="lg lg-M">早</span>早班
-            <span class="lg lg-E">晚</span>晚班
-            <span class="lg lg-D">全</span>全天
-            <span class="lg lg-O">休</span>休假
-            <span class="lg lg-L">假</span>請假　·　<span id="shiftHint">直接點格子下拉選，馬上儲存</span>
+            <span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:#1d4870;vertical-align:-2px"></span> 案場
+            　<span style="display:inline-block;width:14px;height:14px;border-radius:3px;background:#e2c9a0;vertical-align:-2px"></span> 休假
+            　·　<span id="shiftHint">點格子排案場或休假</span>
           </div>
           <div style="overflow-x:auto"><table class="shift-tbl" id="shiftTbl"></table></div>
         </div>
       </div>
 
       <div class="erp-view" id="v-shiftcfg">
-        <div class="crumb">人事 / 班別設定</div>
-        <div class="ptitle">班別設定</div>
-        <div class="panel" style="max-width:460px">
-          <p style="font-size:13px;color:var(--muted);margin-bottom:16px">設定各班別的上班時間與遲到寬限，員工打卡時系統會依此自動判定「正常／遲到」。</p>
-          <div class="cfg-row"><label>早班　上班時間</label><input type="time" id="cfgM"></div>
-          <div class="cfg-row"><label>晚班　上班時間</label><input type="time" id="cfgE"></div>
-          <div class="cfg-row"><label>全天　上班時間</label><input type="time" id="cfgD"></div>
-          <div class="cfg-row"><label>遲到寬限（分鐘）</label><input type="number" id="cfgG" min="0" max="120" step="1"></div>
-          <button class="ea-btn" style="margin-top:8px" onclick="saveCfg()">儲存設定</button>
-          <div id="cfgMsg" style="margin-top:10px;font-size:13px;font-weight:700;min-height:18px"></div>
-          <p style="font-size:12px;color:var(--muted);margin-top:6px">休假、請假當天打卡會標記提醒；未排班當天打卡標記「未排」。</p>
+        <div class="crumb">人事 / 案場管理</div>
+        <div class="ptitle">案場管理</div>
+        <div class="panel">
+          <div id="siteFormWrap" style="display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-bottom:14px">
+            <input type="hidden" id="siteId">
+            <div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:11.5px;color:var(--muted);font-weight:700">案場名稱</label><input id="siteName" placeholder="例如 南區大樓補強" style="padding:8px 10px;border:1px solid var(--line);border-radius:7px;font-family:inherit"></div>
+            <div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:11.5px;color:var(--muted);font-weight:700">工地地址</label><input id="siteAddr" placeholder="新北市..." style="padding:8px 10px;border:1px solid var(--line);border-radius:7px;width:220px;font-family:inherit"></div>
+            <div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:11.5px;color:var(--muted);font-weight:700">座標(選填) 緯度,經度</label><input id="siteLL" placeholder="25.077,121.435" style="padding:8px 10px;border:1px solid var(--line);border-radius:7px;font-family:inherit"></div>
+            <button class="ea-btn" onclick="siteSave()">儲存案場</button>
+            <button class="ea-btn" style="background:#f6f9fb;color:var(--navy2);border:1px solid var(--line)" onclick="siteClear()">清空</button>
+          </div>
+          <div style="overflow-x:auto"><table class="shift-tbl"><thead><tr><th style="text-align:left">名稱</th><th style="text-align:left">地址</th><th>座標</th><th>狀態</th><th>操作</th></tr></thead><tbody id="siteBody"></tbody></table></div>
+          <p style="font-size:12px;color:var(--muted);margin-top:8px">座標選填；填了之後，員工打卡 GPS 離案場 &gt;300m，打卡明細會標「偏離」。在工地時用手機打卡頁顯示的座標填這裡最準。</p>
         </div>
       </div>
 
@@ -645,6 +645,30 @@
   </div>
 </div>
 
+<div id="scOv" style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:3000;padding:16px">
+  <div style="background:#fff;border-radius:14px;padding:20px;max-width:460px;width:100%;max-height:90vh;overflow:auto">
+    <h3 id="scTitle" style="font-size:17px;color:#13314f;margin-bottom:4px">排班</h3>
+    <div id="scSub" style="font-size:13px;color:#647284;margin-bottom:14px"></div>
+    <div id="scSel" style="min-height:38px;border:1px dashed #dde4ea;border-radius:8px;padding:8px;margin-bottom:12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center"></div>
+    <div id="scSites"></div>
+    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+      <button class="ea-btn" style="background:#8a5a2b" onclick="scOff()">標休假</button>
+      <button class="ea-btn" style="background:#f6f9fb;color:#1d4870;border:1px solid #dde4ea" onclick="scClear()">清空</button>
+      <button class="ea-btn" onclick="scSave()">儲存</button>
+      <button class="ea-btn" style="background:#f6f9fb;color:#1d4870;border:1px solid #dde4ea" onclick="scClose()">取消</button>
+    </div>
+  </div>
+</div>
+<style>
+  #scOv.show{display:flex !important}
+  .scchip{background:#13314f;color:#fff;font-size:12.5px;font-weight:700;padding:4px 10px;border-radius:14px}
+  .scbtn{border:1px solid #dde4ea;background:#f6f9fb;color:#13314f;font-weight:700;font-size:13px;padding:8px 12px;border-radius:9px;cursor:pointer;margin:3px}
+  td.scell{cursor:pointer;text-align:center}
+  td.scell .site{color:#13314f;font-weight:700}
+  td.scell .off{color:#8a5a2b;font-weight:700}
+  .sst{font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px}
+  .sst.act{background:#dcfce7;color:#166534}.sst.done{background:#e5e7eb;color:#374151}
+</style>
 <script>
   var IMGBASE = "https://www.arch-world.com.tw/manage/VipAddProducts/";
   var PROJ = [
@@ -724,32 +748,39 @@
   function eaEnter(){eaClose();openErp();}
   function eaLogout(){localStorage.removeItem('gx_me');GX_ME=null;closeErp();}
 
-  // ===== 班別設定 =====
-  function loadCfg(){
-    if(!GX_ME) return;
+  // ===== 案場管理 =====
+  var GX_SITES=[];
+  function loadSitesMgmt(){
+    if(!GX_ME)return;
     var canEdit=GX_ME.perm==='admin'||GX_ME.perm==='manager';
-    ['cfgM','cfgE','cfgD','cfgG'].forEach(function(id){$g(id).disabled=!canEdit;});
-    document.querySelector('#v-shiftcfg .ea-btn').style.display=canEdit?'block':'none';
-    fetch(GX_API+'/api/shift-config/get',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({empno:GX_ME.empno,token:GX_ME.token})})
-    .then(function(r){return r.json();}).then(function(d){
-      var c=d.config||{M:'08:00',E:'13:00',D:'08:00',grace:15};
-      $g('cfgM').value=c.M;$g('cfgE').value=c.E;$g('cfgD').value=c.D;$g('cfgG').value=c.grace;
-    }).catch(function(){$g('cfgMsg').textContent='載入失敗';});
+    $g('siteFormWrap').style.display=canEdit?'flex':'none';
+    fetch(GX_API+'/api/sites/list',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({empno:GX_ME.empno,token:GX_ME.token})})
+    .then(function(r){return r.json();}).then(function(d){GX_SITES=d.rows||[];renderSitesMgmt();}).catch(function(){});
   }
-  function saveCfg(){
-    var cfg={M:$g('cfgM').value,E:$g('cfgE').value,D:$g('cfgD').value,grace:$g('cfgG').value};
-    if(!cfg.M||!cfg.E||!cfg.D){$g('cfgMsg').style.color='var(--accent)';$g('cfgMsg').textContent='請填完整上班時間';return;}
-    $g('cfgMsg').style.color='var(--muted)';$g('cfgMsg').textContent='儲存中…';
-    fetch(GX_API+'/api/shift-config/set',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({empno:GX_ME.empno,token:GX_ME.token,config:cfg})})
-    .then(function(r){return r.json();}).then(function(d){
-      if(d.ok){$g('cfgMsg').style.color='var(--ok)';$g('cfgMsg').textContent='已儲存 ✓';}
-      else {$g('cfgMsg').style.color='var(--accent)';$g('cfgMsg').textContent=d.error||'儲存失敗';}
-    }).catch(function(){$g('cfgMsg').style.color='var(--accent)';$g('cfgMsg').textContent='連線失敗';});
+  function renderSitesMgmt(){
+    var canEdit=GX_ME&&(GX_ME.perm==='admin'||GX_ME.perm==='manager');
+    var tb=$g('siteBody');
+    if(!GX_SITES.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:18px">尚無案場，請在上方新增</td></tr>';return;}
+    tb.innerHTML=GX_SITES.map(function(s){
+      var ll=(s.lat!=null)?(s.lat.toFixed(4)+','+s.lng.toFixed(4)):'—';
+      var st=s.status==='done'?'<span class="sst done">完工</span>':'<span class="sst act">進行中</span>';
+      var ops=canEdit?('<a style="cursor:pointer;color:var(--navy2);font-weight:700" onclick="siteEdit('+s.id+')">編輯</a> ｜ <a style="cursor:pointer;color:var(--navy2);font-weight:700" onclick="siteToggle('+s.id+',\''+(s.status==='done'?'active':'done')+'\')">'+(s.status==='done'?'復工':'完工')+'</a>'):'—';
+      return '<tr><td style="text-align:left"><b>'+s.name+'</b></td><td style="text-align:left">'+(s.address||'—')+'</td><td>'+ll+'</td><td>'+st+'</td><td>'+ops+'</td></tr>';
+    }).join('');
   }
+  function siteEdit(id){var s=GX_SITES.filter(function(x){return x.id===id;})[0];if(!s)return;$g('siteId').value=s.id;$g('siteName').value=s.name;$g('siteAddr').value=s.address||'';$g('siteLL').value=(s.lat!=null)?(s.lat+','+s.lng):'';}
+  function siteClear(){$g('siteId').value='';$g('siteName').value='';$g('siteAddr').value='';$g('siteLL').value='';}
+  function siteSave(){
+    var name=$g('siteName').value.trim();if(!name){alert('請輸入案場名稱');return;}
+    var lat=null,lng=null,ll=$g('siteLL').value.trim();if(ll){var m=ll.split(',');if(m.length===2){lat=parseFloat(m[0]);lng=parseFloat(m[1]);}}
+    fetch(GX_API+'/api/sites/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({empno:GX_ME.empno,token:GX_ME.token,id:$g('siteId').value||null,name:name,address:$g('siteAddr').value.trim(),lat:lat,lng:lng,status:'active'})})
+    .then(function(r){return r.json();}).then(function(d){if(d.ok){siteClear();loadSitesMgmt();}else alert('失敗：'+(d.error||''));}).catch(function(){alert('連線失敗');});
+  }
+  function siteToggle(id,status){var s=GX_SITES.filter(function(x){return x.id===id;})[0];if(!s)return;
+    fetch(GX_API+'/api/sites/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({empno:GX_ME.empno,token:GX_ME.token,id:id,name:s.name,address:s.address,lat:s.lat,lng:s.lng,status:status})})
+    .then(function(r){return r.json();}).then(function(d){if(d.ok)loadSitesMgmt();else alert('失敗：'+(d.error||''));}).catch(function(){alert('連線失敗');});}
 
-  // ===== 排班表 =====
+  // ===== 案場排班 =====
   var SH_ROSTER=[
     ['002','陳敬廉','總經理'],['003','陳冠男','副總經理'],
     ['004','陳軍廷','工務經理'],['005','康竣凱','工務經理'],['006','蕭尉勳','特助'],['007','楊茜媛','會計'],
@@ -757,69 +788,67 @@
     ['010','陳凱強','技工'],['011','羅忠順','技工'],['012','蘇慶昌','技工'],['013','呂忠義','技工'],
     ['014','胡定','移工'],['015','德偉','移工'],['016','阿南','移工'],['017','EKO','移工'],['018','阿NO','移工']
   ];
-  var SH_OPTS=[['',''],['M','早'],['E','晚'],['D','全'],['O','休'],['L','假']];
   var SH_WD=['日','一','二','三','四','五','六'];
-  var shBase=null, shInited=false;
+  var shBase=null, GX_SCHED={}, scEmp=null, scDate=null, scSel=[];
   function shPad(n){return (n<10?'0':'')+n;}
   function shFmt(d){return d.getFullYear()+'-'+shPad(d.getMonth()+1)+'-'+shPad(d.getDate());}
   function shMonday(d){var x=new Date(d);x.setHours(0,0,0,0);var g=x.getDay();x.setDate(x.getDate()+(g===0?-6:1-g));return x;}
-  function initShift(){
-    if(!shBase) shBase=shMonday(new Date());
-    renderShift();
-  }
-  function shiftWeek(delta){
-    if(!shBase||delta===0) shBase=shMonday(new Date());
-    else shBase.setDate(shBase.getDate()+7*delta);
-    renderShift();
-  }
-  function renderShift(){
-    var canEdit = GX_ME && (GX_ME.perm==='admin'||GX_ME.perm==='manager');
-    var days=[]; for(var i=0;i<7;i++){var d=new Date(shBase);d.setDate(shBase.getDate()+i);days.push(d);}
+  function initSchedule(){ if(!shBase)shBase=shMonday(new Date()); ensureSitesLoaded(renderSchedule); }
+  function ensureSitesLoaded(cb){ if(GX_SITES.length||!GX_ME){cb&&cb();return;} fetch(GX_API+'/api/sites/list',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({empno:GX_ME.empno,token:GX_ME.token})}).then(function(r){return r.json();}).then(function(d){GX_SITES=d.rows||[];cb&&cb();}).catch(function(){cb&&cb();}); }
+  function shiftWeek(delta){ if(!shBase||delta===0)shBase=shMonday(new Date()); else shBase.setDate(shBase.getDate()+7*delta); renderSchedule(); }
+  function schedDays(){var a=[];for(var i=0;i<7;i++){var d=new Date(shBase);d.setDate(shBase.getDate()+i);a.push(d);}return a;}
+  function renderSchedule(){
+    var canEdit=GX_ME&&(GX_ME.perm==='admin'||GX_ME.perm==='manager');
+    var days=schedDays();
     document.getElementById('shiftRange').textContent=shFmt(days[0])+' ～ '+shFmt(days[6]);
-    document.getElementById('shiftHint').textContent = canEdit ? '直接點格子下拉選，馬上儲存' : '你的權限為唯讀，僅管理層／主管可排班';
-    var todayStr=shFmt(new Date());
+    document.getElementById('shiftHint').textContent=canEdit?'點格子排案場或休假':'唯讀，僅管理層／主管可排班';
     var h='<thead><tr><th class="emp" style="text-align:left">員工</th>';
-    days.forEach(function(d){var wd=d.getDay();var wk=(wd===0||wd===6);h+='<th class="'+(wk?'wknd':'')+'">'+(d.getMonth()+1)+'/'+d.getDate()+'<br><small>('+SH_WD[wd]+')</small></th>';});
+    days.forEach(function(d){var wd=d.getDay();h+='<th class="'+((wd===0||wd===6)?'wknd':'')+'">'+(d.getMonth()+1)+'/'+d.getDate()+'<br><small>('+SH_WD[wd]+')</small></th>';});
     h+='</tr></thead><tbody>';
     SH_ROSTER.forEach(function(p){
       h+='<tr><td class="emp">'+p[1]+'<small>'+p[0]+'・'+p[2]+'</small></td>';
-      days.forEach(function(d){
-        var ds=shFmt(d);
-        var opts=SH_OPTS.map(function(o){return '<option value="'+o[0]+'">'+(o[1]||'—')+'</option>';}).join('');
-        h+='<td><select class="shcell" data-emp="'+p[0]+'" data-date="'+ds+'" '+(canEdit?'onchange="setShift(this)"':'disabled')+'>'+opts+'</select></td>';
-      });
+      days.forEach(function(d){var ds=shFmt(d);h+='<td class="scell" id="sc-'+p[0]+'-'+ds+'" '+(canEdit?'onclick="openCell(\''+p[0]+'\',\''+ds+'\')"':'')+'>—</td>';});
       h+='</tr>';
     });
     h+='</tbody>';
     document.getElementById('shiftTbl').innerHTML=h;
-    loadShiftData(shFmt(days[0]),shFmt(days[6]));
+    loadSchedData(shFmt(days[0]),shFmt(days[6]));
   }
-  function shColor(sel){
-    sel.className='shcell'+(sel.value?(' v-'+sel.value):'');
-  }
-  function loadShiftData(from,to){
-    if(!GX_ME){return;}
+  function loadSchedData(from,to){
+    if(!GX_ME)return;
     document.getElementById('shiftMsg').textContent='載入中…';
-    fetch(GX_API+'/api/shifts/list',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({empno:GX_ME.empno,token:GX_ME.token,from:from,to:to})})
+    fetch(GX_API+'/api/schedule/list',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({empno:GX_ME.empno,token:GX_ME.token,from:from,to:to})})
     .then(function(r){return r.json();}).then(function(d){
       document.getElementById('shiftMsg').textContent='';
-      var map={}; (d.rows||[]).forEach(function(r){map[r.empno+'|'+r.date]=r.shift;});
-      var cells=document.querySelectorAll('#shiftTbl .shcell');
-      cells.forEach(function(sel){var v=map[sel.dataset.emp+'|'+sel.dataset.date]||'';sel.value=v;shColor(sel);});
+      GX_SCHED={};(d.rows||[]).forEach(function(r){(GX_SCHED[r.empno+'|'+r.date]=GX_SCHED[r.empno+'|'+r.date]||[]).push(r);});
+      Object.keys(GX_SCHED).forEach(function(key){
+        var cell=document.getElementById('sc-'+key.split('|')[0]+'-'+key.split('|')[1]);if(!cell)return;
+        var items=GX_SCHED[key].sort(function(a,b){return a.seq-b.seq;});
+        if(items.some(function(x){return x.kind==='off';}))cell.innerHTML='<span class="off">休假</span>';
+        else cell.innerHTML='<span class="site">'+items.filter(function(x){return x.kind==='site';}).map(function(x){return x.site_name||('#'+x.site_id);}).join('<br>')+'</span>';
+      });
     }).catch(function(){document.getElementById('shiftMsg').textContent='載入失敗';});
   }
-  function setShift(sel){
-    shColor(sel);
-    var prev=sel.dataset.prev||'';
-    document.getElementById('shiftMsg').textContent='儲存中…';
-    fetch(GX_API+'/api/shifts/set',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({empno:GX_ME.empno,token:GX_ME.token,target:sel.dataset.emp,date:sel.dataset.date,shift:sel.value})})
-    .then(function(r){return r.json();}).then(function(d){
-      if(d.ok){document.getElementById('shiftMsg').textContent='已儲存 ✓';sel.dataset.prev=sel.value;
-        setTimeout(function(){var m=document.getElementById('shiftMsg');if(m.textContent==='已儲存 ✓')m.textContent='';},1500);}
-      else {document.getElementById('shiftMsg').textContent=d.error||'儲存失敗';sel.value=prev;shColor(sel);}
-    }).catch(function(){document.getElementById('shiftMsg').textContent='連線失敗';sel.value=prev;shColor(sel);});
+  function openCell(empno,date){
+    if(!(GX_ME&&(GX_ME.perm==='admin'||GX_ME.perm==='manager')))return;
+    scEmp=empno;scDate=date;scSel=[];
+    var items=(GX_SCHED[empno+'|'+date]||[]).sort(function(a,b){return a.seq-b.seq;});
+    items.forEach(function(x){if(x.kind==='off')scSel=[{kind:'off'}];else if(x.kind==='site')scSel.push({kind:'site',site_id:x.site_id,name:x.site_name||('#'+x.site_id)});});
+    var p=SH_ROSTER.filter(function(x){return x[0]===empno;})[0];
+    document.getElementById('scTitle').textContent='排班 · '+empno+' '+(p?p[1]:'');
+    document.getElementById('scSub').textContent=date;
+    document.getElementById('scSites').innerHTML=GX_SITES.filter(function(s){return s.status!=='done';}).map(function(s){return '<button class="scbtn" onclick="scAdd('+s.id+',\''+s.name.replace(/'/g,'')+'\')">'+s.name+'</button>';}).join('')||'<div style="color:var(--muted);font-size:13px">尚無進行中案場，請先到「案場管理」新增</div>';
+    scRenderSel();document.getElementById('scOv').classList.add('show');
+  }
+  function scRenderSel(){document.getElementById('scSel').innerHTML=scSel.length?scSel.map(function(x,i){return '<span class="scchip">'+(x.kind==='off'?'休假':(i+1)+'. '+x.name)+'</span>';}).join(''):'<span style="color:var(--muted);font-size:13px">點下方案場加入，或標休假</span>';}
+  function scAdd(id,name){if(scSel.some(function(x){return x.kind==='off';}))scSel=[];if(scSel.some(function(x){return x.site_id===id;}))return;scSel.push({kind:'site',site_id:id,name:name});scRenderSel();}
+  function scOff(){scSel=[{kind:'off'}];scRenderSel();}
+  function scClear(){scSel=[];scRenderSel();}
+  function scClose(){document.getElementById('scOv').classList.remove('show');}
+  function scSave(){
+    var items=scSel.map(function(x){return x.kind==='off'?{kind:'off'}:{kind:'site',site_id:x.site_id};});
+    fetch(GX_API+'/api/schedule/set',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({empno:GX_ME.empno,token:GX_ME.token,target:scEmp,date:scDate,items:items})})
+    .then(function(r){return r.json();}).then(function(d){if(d.ok){scClose();renderSchedule();}else alert('失敗：'+(d.error||''));}).catch(function(){alert('連線失敗');});
   }
 
   function openErp(){document.getElementById('pnav').classList.remove('open');document.getElementById('site').classList.add('hide');document.getElementById('erp').classList.add('show');closeSide();window.scrollTo(0,0);}
@@ -832,8 +861,8 @@
     document.getElementById('v-'+v).classList.add('on');
     document.querySelector('.main').scrollTop=0;
     closeSide();
-    if(v==='shift') initShift();
-    if(v==='shiftcfg') loadCfg();
+    if(v==='shift') initSchedule();
+    if(v==='shiftcfg') loadSitesMgmt();
   }
 </script>
 </body>
