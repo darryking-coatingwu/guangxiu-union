@@ -475,6 +475,7 @@
       <a data-v="hr" onclick="erpNav('hr')"><span class="e">👷</span>出勤 · 簽核</a>
       <a data-v="shift" onclick="erpNav('shift')"><span class="e">🗓</span>排班表</a>
       <a data-v="shiftcfg" onclick="erpNav('shiftcfg')"><span class="e">🏗</span>案場管理</a>
+      <a data-v="emp" onclick="erpNav('emp')"><span class="e">🧑</span>員工權限</a>
       <div class="grp">分析</div>
       <a data-v="rep" onclick="erpNav('rep')"><span class="e">📊</span>報表中心</a>
     </div>
@@ -572,25 +573,38 @@
       </div>
 
       <div class="erp-view" id="v-hr">
-        <div class="crumb">人事 / 出勤簽核</div>
-        <div class="ptitle">出勤 · 簽核</div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px">
-          <a href="punch.html" style="display:inline-block;background:var(--accent);color:#fff;font-weight:800;padding:13px 22px;border-radius:10px;font-size:15px">📍 GPS 定位打卡</a>
-          <a href="admin.html" style="display:inline-block;background:var(--navy);color:#fff;font-weight:800;padding:13px 22px;border-radius:10px;font-size:15px">🖥 打卡後台（公司）</a>
+        <div class="crumb">人事 / 出勤打卡</div>
+        <div class="ptitle">出勤打卡明細</div>
+        <a href="punch.html" style="display:inline-block;background:var(--accent);color:#fff;font-weight:800;padding:11px 20px;border-radius:10px;font-size:14.5px;margin-bottom:14px">📍 開啟 GPS 定位打卡</a>
+        <div class="panel">
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin-bottom:14px">
+            <div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:11.5px;color:var(--muted);font-weight:700">員工</label><select id="pfEmp" style="padding:8px 10px;border:1px solid var(--line);border-radius:7px;font-family:inherit"><option value="">全部</option></select></div>
+            <div style="display:flex;flex-direction:column;gap:4px"><label style="font-size:11.5px;color:var(--muted);font-weight:700">日期</label><input type="date" id="pfDate" style="padding:8px 10px;border:1px solid var(--line);border-radius:7px;font-family:inherit"></div>
+            <button class="ea-btn" onclick="loadPunches()">查詢</button>
+            <button class="ea-btn" style="background:#f6f9fb;color:var(--navy2);border:1px solid var(--line)" onclick="clearPunchF()">清除</button>
+            <button class="ea-btn" style="background:#f6f9fb;color:var(--navy2);border:1px solid var(--line)" onclick="exportPunchCSV()">匯出 CSV</button>
+          </div>
+          <div class="kpis" style="margin-bottom:16px">
+            <div class="kpi"><span>總打卡</span><b id="pkTotal">0</b></div>
+            <div class="kpi"><span>上班</span><b id="pkIn">0</b></div>
+            <div class="kpi"><span>下班</span><b id="pkOut">0</b></div>
+            <div class="kpi"><span>打卡人數</span><b id="pkPpl">0</b></div>
+          </div>
+          <div style="overflow-x:auto"><table class="shift-tbl"><thead><tr><th style="text-align:left">時間</th><th style="text-align:left">員工</th><th>類別</th><th>案場</th><th>偏離</th><th>早退</th><th>位置</th></tr></thead><tbody id="pBody"></tbody></table></div>
+          <div id="pEmpty" style="display:none;color:var(--muted);text-align:center;padding:18px">查無打卡資料</div>
         </div>
-        <div class="kpis">
-          <div class="kpi"><span>今日出勤</span><b>14 / 16</b></div>
-          <div class="kpi"><span>工地 GPS 打卡</span><b>9</b></div>
-          <div class="kpi"><span>待簽表單</span><b>3</b></div>
-          <div class="kpi"><span>本月加班</span><b>96 h</b></div>
-        </div>
-        <div class="panel"><h4>👷 今日出勤</h4>
-          <table>
-            <tr><th>姓名</th><th>工地</th><th>上班</th><th>狀態</th></tr>
-            <tr><td>林志成</td><td>板橋工地</td><td>08:02</td><td><span class="badge b-ok">正常</span></td></tr>
-            <tr><td>陳建宏</td><td>五股廠房</td><td>08:21</td><td><span class="badge b-wait">遲到</span></td></tr>
-            <tr><td>王大維</td><td>公司</td><td>08:25</td><td><span class="badge b-ok">正常</span></td></tr>
-          </table>
+      </div>
+
+      <div class="erp-view" id="v-emp">
+        <div class="crumb">人事 / 員工權限</div>
+        <div class="ptitle">員工名錄與權限</div>
+        <div class="panel">
+          <div style="margin-bottom:12px">
+            <button class="ea-btn" style="background:#f6f9fb;color:var(--navy2);border:1px solid var(--line)" onclick="loadEmpUsers()">重新整理</button>
+            <button class="ea-btn" style="background:#f6f9fb;color:var(--navy2);border:1px solid var(--line)" onclick="empSeed()">建立/重設名錄（18人）</button>
+          </div>
+          <div style="overflow-x:auto"><table class="shift-tbl"><thead><tr><th style="text-align:left">編號</th><th style="text-align:left">姓名</th><th style="text-align:left">職稱</th><th>權限</th><th>操作</th></tr></thead><tbody id="empBody"></tbody></table></div>
+          <p style="font-size:12px;color:var(--muted);margin-top:8px">權限：管理層＝看全部/管理員工；主管/行政＝看打卡與排班；員工＝只打卡。改權限、重設密碼即時生效。</p>
         </div>
       </div>
 
@@ -874,6 +888,68 @@
     .then(function(r){return r.json();}).then(function(d){if(d.ok){scClose();renderSchedule();}else alert('失敗：'+(d.error||''));}).catch(function(){alert('連線失敗');});
   }
 
+  // ===== 出勤打卡明細 =====
+  var GX_PUNCHES=[];
+  function pAuth(){return 'empno='+encodeURIComponent(GX_ME.empno)+'&token='+encodeURIComponent(GX_ME.token);}
+  function clearPunchF(){$g('pfEmp').value='';$g('pfDate').value='';loadPunches();}
+  function loadPunches(){
+    if(!GX_ME)return;
+    var emp=$g('pfEmp')?$g('pfEmp').value:'',date=$g('pfDate')?$g('pfDate').value:'';
+    var u=GX_API+'/api/punches?'+pAuth();
+    if(emp)u+='&emp='+encodeURIComponent(emp);
+    if(date)u+='&date='+encodeURIComponent(date);
+    fetch(u).then(function(r){return r.json();}).then(function(d){if(d.ok){GX_PUNCHES=d.rows||[];renderPunches();}}).catch(function(){});
+  }
+  function pFmt(iso){var dt=new Date(iso);return dt.toLocaleString('zh-TW',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false});}
+  function renderPunches(){
+    var rows=GX_PUNCHES;var sel=$g('pfEmp');var have={};for(var i=1;i<sel.options.length;i++)have[sel.options[i].value]=1;
+    rows.forEach(function(r){if(!have[r.emp]){have[r.emp]=1;var o=document.createElement('option');o.value=r.emp;o.textContent=r.emp;sel.appendChild(o);}});
+    $g('pkTotal').textContent=rows.length;
+    $g('pkIn').textContent=rows.filter(function(r){return r.type==='in';}).length;
+    $g('pkOut').textContent=rows.filter(function(r){return r.type==='out';}).length;
+    var ppl={};rows.forEach(function(r){ppl[r.emp]=1;});$g('pkPpl').textContent=Object.keys(ppl).length;
+    var tb=$g('pBody');$g('pEmpty').style.display=rows.length?'none':'block';
+    tb.innerHTML=rows.map(function(r){
+      var loc=(r.lat!=null)?'<a target="_blank" style="color:var(--navy2);font-weight:700" href="https://www.google.com/maps?q='+r.lat+','+r.lng+'">📍地圖</a>':'—';
+      var cat=r.type==='in'?'<span style="background:#e4f5ec;color:#166534;font-weight:700;font-size:11.5px;padding:3px 9px;border-radius:16px">上班</span>':'<span style="background:#e7eef6;color:#1d4870;font-weight:700;font-size:11.5px;padding:3px 9px;border-radius:16px">下班</span>';
+      var dev=(r.dev_m==null)?'—':(r.dev_m>300?'<span style="background:#fee2e2;color:#991b1b;font-weight:700;font-size:11.5px;padding:3px 9px;border-radius:16px">偏離 '+r.dev_m+'m</span>':'<span style="color:#166534;font-weight:700">案場內</span>');
+      var early=(r.type==='out'&&r.early==1)?'<span style="background:#fee2e2;color:#991b1b;font-weight:700;font-size:11.5px;padding:3px 9px;border-radius:16px">早退</span>':'—';
+      return '<tr><td style="text-align:left">'+pFmt(r.punched_at)+'</td><td style="text-align:left"><b>'+r.emp+'</b></td><td>'+cat+'</td><td>'+(r.site_name||'—')+'</td><td>'+dev+'</td><td>'+early+'</td><td>'+loc+'</td></tr>';
+    }).join('');
+  }
+  function exportPunchCSV(){
+    var rows=GX_PUNCHES;var head=['時間','員工','類別','案場','偏離m','早退','緯度','經度'];var lines=[head.join(',')];
+    rows.forEach(function(r){lines.push([pFmt(r.punched_at),r.emp,(r.type==='in'?'上班':'下班'),(r.site_name||''),(r.dev_m==null?'':r.dev_m),(r.type==='out'&&r.early==1?'早退':''),r.lat,r.lng].join(','));});
+    var blob=new Blob(['﻿'+lines.join('\n')],{type:'text/csv;charset=utf-8'});
+    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='廣修打卡.csv';a.click();
+  }
+
+  // ===== 員工名錄與權限 =====
+  function loadEmpUsers(){
+    if(!GX_ME)return;
+    fetch(GX_API+'/api/admin/users?'+pAuth()).then(function(r){return r.json();}).then(function(d){
+      if(!d.ok){alert(d.error||'讀取失敗');return;}
+      $g('empBody').innerHTML=(d.rows||[]).map(function(u){
+        var s='<select onchange="empSetPerm(\''+u.empno+'\',this.value)" style="padding:5px 8px;border:1px solid var(--line);border-radius:6px;font-size:13px"><option value="admin"'+(u.perm==='admin'?' selected':'')+'>管理層</option><option value="manager"'+(u.perm==='manager'?' selected':'')+'>主管/行政</option><option value="staff"'+((u.perm==='staff'||!u.perm)?' selected':'')+'>員工</option></select>';
+        return '<tr><td style="text-align:left"><b>'+u.empno+'</b></td><td style="text-align:left">'+(u.name||'')+'</td><td style="text-align:left">'+(u.role||'')+'</td><td>'+s+'</td><td><a style="cursor:pointer;color:var(--navy2);font-weight:700" onclick="empResetPw(\''+u.empno+'\')">重設密碼</a></td></tr>';
+      }).join('');
+    }).catch(function(){alert('連線失敗');});
+  }
+  function empSetPerm(target,perm){
+    fetch(GX_API+'/api/admin/set-perm?'+pAuth(),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({empno:target,perm:perm})})
+    .then(function(r){return r.json();}).then(function(d){if(!d.ok)alert('失敗：'+(d.error||''));}).catch(function(){alert('連線失敗');});
+  }
+  function empResetPw(target){
+    if(!confirm('把編號 '+target+' 的密碼重設為 1234？'))return;
+    fetch(GX_API+'/api/admin/reset-pw?'+pAuth(),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({empno:target})})
+    .then(function(r){return r.json();}).then(function(d){alert(d.ok?d.message:('失敗：'+(d.error||'')));}).catch(function(){alert('連線失敗');});
+  }
+  function empSeed(){
+    if(!confirm('建立/重設員工名錄（18人）？所有人密碼設成 1234。'))return;
+    fetch(GX_API+'/api/admin/seed-roster?'+pAuth(),{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'})
+    .then(function(r){return r.json();}).then(function(d){alert(d.ok?d.message:('失敗：'+(d.error||'')));if(d.ok)loadEmpUsers();}).catch(function(){alert('連線失敗');});
+  }
+
   function openErp(){document.getElementById('pnav').classList.remove('open');document.getElementById('site').classList.add('hide');document.getElementById('erp').classList.add('show');closeSide();window.scrollTo(0,0);}
   function closeErp(){document.getElementById('erp').classList.remove('show');document.getElementById('site').classList.remove('hide');closeSide();window.scrollTo(0,0);}
   function toggleSide(){document.getElementById('side').classList.toggle('open');document.getElementById('sideOverlay').classList.toggle('open');}
@@ -886,6 +962,8 @@
     closeSide();
     if(v==='shift') initSchedule();
     if(v==='shiftcfg') loadSitesMgmt();
+    if(v==='hr') loadPunches();
+    if(v==='emp') loadEmpUsers();
   }
 </script>
 </body>

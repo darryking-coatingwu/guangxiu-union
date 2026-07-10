@@ -60,6 +60,14 @@ async function authUser(env, rawEmpno, token) {
 }
 function groupOf(perm) { return (perm === "admin" || perm === "manager") ? "office" : "site"; }
 const END_MIN = { site: 17 * 60, office: 18 * 60 }; // 工地師傅17:00 / 管理部18:00
+// 後台授權：主密碼 ?key= 或 管理層/主管的登入 token（query 或 body）
+async function isMgr(env, url, body) {
+  if (url.searchParams.get("key") === env.ADMIN_KEY) return { empno: "000", perm: "admin" };
+  let empno = url.searchParams.get("empno"), token = url.searchParams.get("token");
+  if ((!empno || !token) && body) { empno = body.empno; token = body.token; }
+  const u = await authUser(env, empno, token);
+  return (u && (u.perm === "admin" || u.perm === "manager")) ? u : null;
+}
 function p2(n) { return String(n).padStart(2, "0"); }
 function twWall() { return new Date(Date.now() + 8 * 3600 * 1000); }
 function twDateStr(d) { return d.getUTCFullYear() + "-" + p2(d.getUTCMonth() + 1) + "-" + p2(d.getUTCDate()); }
@@ -139,7 +147,7 @@ export default {
       }
       // ===== 後台讀打卡 =====
       if (url.pathname === "/api/punches" && request.method === "GET") {
-        if (!isAdmin()) return json({ error: "密碼錯誤" }, 401);
+        if (!await isMgr(env, url, null)) return json({ error: "未授權" }, 401);
         let q = "SELECT * FROM punches WHERE 1=1"; const ps = [];
         const emp = url.searchParams.get("emp"); if (emp) { q += " AND emp = ?"; ps.push(emp); }
         const date = url.searchParams.get("date"); if (date) { q += " AND substr(punched_at,1,10) = ?"; ps.push(date); }
@@ -149,13 +157,13 @@ export default {
       }
       // ===== 名錄 / 權限 =====
       if (url.pathname === "/api/admin/users" && request.method === "GET") {
-        if (!isAdmin()) return json({ error: "密碼錯誤" }, 401);
+        if (!await isMgr(env, url, null)) return json({ error: "未授權" }, 401);
         await ensureUsers(env);
         const { results } = await env.DB.prepare("SELECT empno,name,role,perm,updated_at FROM users ORDER BY empno").all();
         return json({ ok: true, rows: results });
       }
       if (url.pathname === "/api/admin/seed-roster" && request.method === "POST") {
-        if (!isAdmin()) return json({ error: "密碼錯誤" }, 401);
+        if (!await isMgr(env, url, null)) return json({ error: "未授權" }, 401);
         await ensureUsers(env);
         const now = new Date().toISOString();
         await env.DB.prepare("DELETE FROM users").run();
@@ -168,18 +176,18 @@ export default {
         return json({ ok: true, total: ROSTER.length, message: "已建立員工名錄 " + ROSTER.length + " 人（密碼全部重設為 1234）" });
       }
       if (url.pathname === "/api/admin/set-perm" && request.method === "POST") {
-        if (!isAdmin()) return json({ error: "密碼錯誤" }, 401);
-        await ensureUsers(env);
         const b = await request.json();
+        if (!await isMgr(env, url, null)) return json({ error: "未授權" }, 401);
+        await ensureUsers(env);
         const empno = padNo(b.empno);
         if (!empno || !["admin", "manager", "staff"].includes(b.perm)) return json({ error: "參數錯誤" }, 400);
         await env.DB.prepare("UPDATE users SET perm=?, updated_at=? WHERE empno=?").bind(b.perm, new Date().toISOString(), empno).run();
         return json({ ok: true });
       }
       if (url.pathname === "/api/admin/reset-pw" && request.method === "POST") {
-        if (!isAdmin()) return json({ error: "密碼錯誤" }, 401);
-        await ensureUsers(env);
         const b = await request.json();
+        if (!await isMgr(env, url, null)) return json({ error: "未授權" }, 401);
+        await ensureUsers(env);
         const empno = padNo(b.empno);
         if (!empno) return json({ error: "編號錯誤" }, 400);
         const h = await sha256(empno + ":1234");
